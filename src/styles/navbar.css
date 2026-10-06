@@ -1,0 +1,189 @@
+/* =========================
+   NAVBAR
+   ========================= */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  width: 100%;
+
+  background: rgba(10, 10, 10, 0.92);
+  border-bottom: 1px solid var(--color-border);
+
+  backdrop-filter: blur(10px);
+}
+
+/* =========================
+   CONTENEDOR
+   ========================= */
+
+.navbar__container {
+  width: min(1200px, 90%);
+  min-height: 72px;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* =========================
+   LOGO
+   ========================= */
+
+.navbar__logo {
+  display: flex;
+  flex-direction: column;
+
+  font-family: var(--font-title);
+  color: var(--color-white);
+
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.navbar__logo-main {
+  font-size: 1.5rem;
+  letter-spacing: 0.18em;
+}
+
+.navbar__logo-sub {
+  margin-top: 0.3rem;
+
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+
+  color: var(--color-text-muted);
+}
+
+/* =========================
+   NAVEGACIÓN
+   ========================= */
+
+.navbar__menu {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+
+  list-style: none;
+}
+
+.navbar__link {
+  position: relative;
+
+  padding: 0.5rem 0;
+
+  color: var(--color-text-muted);
+
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  transition: var(--transition);
+}
+
+.navbar__link::after {
+  content: "";
+
+  position: absolute;
+  left: 0;
+  bottom: 0;
+
+  width: 0;
+  height: 1px;
+
+  background: var(--color-primary);
+
+  transition: var(--transition);
+}
+
+.navbar__link:hover {
+  color: var(--color-white);
+}
+
+.navbar__link:hover::after,
+.navbar__link--active::after {
+  width: 100%;
+}
+
+.navbar__link--active {
+  color: var(--color-white);
+}
+
+/* =========================
+   ACCIONES
+   ========================= */
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navbar__login {
+  color: var(--color-text-muted);
+
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  transition: var(--transition);
+}
+
+.navbar__login:hover {
+  color: var(--color-white);
+}
+
+.navbar__login.navbar__link--active {
+  color: var(--color-white);
+}
+
+/* =========================
+   BOTÓN MENÚ MÓVIL
+   ========================= */
+
+.navbar__toggle {
+  display: none;
+
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-white);
+
+  padding: 0.5rem 0.7rem;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 900px) {
+  .navbar__menu {
+    gap: 1rem;
+  }
+
+  .navbar__link {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .navbar__container {
+    min-height: 64px;
+  }
+
+  .navbar__menu {
+    display: none;
+  }
+
+  .navbar__actions {
+    margin-left: auto;
+  }
+
+  .navbar__toggle {
+    display: block;
+  }
+}

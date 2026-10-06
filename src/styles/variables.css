@@ -1,0 +1,54 @@
+:root {
+  /* =========================
+     COLORES EVENTPASS
+     ========================= */
+
+  --color-bg: #0a0a0a;
+  --color-bg-soft: #111111;
+  --color-bg-card: #161616;
+
+  --color-primary: #d62828;
+  --color-primary-hover: #ef3b3b;
+
+  --color-white: #f5f5f5;
+  --color-text: #dddddd;
+  --color-text-muted: #8c8c8c;
+  --color-border: #2a2a2a;
+
+  /* =========================
+     TIPOGRAFÍA
+     ========================= */
+
+  --font-title: Georgia, "Times New Roman", serif;
+  --font-body: Arial, Helvetica, sans-serif;
+
+  /* =========================
+     TAMAÑOS
+     ========================= */
+
+  --text-xs: 0.7rem;
+  --text-sm: 0.85rem;
+  --text-md: 1rem;
+  --text-lg: 1.3rem;
+  --text-xl: 2.5rem;
+  --text-hero: clamp(3rem, 7vw, 6rem);
+
+  /* =========================
+     ESPACIADO
+     ========================= */
+
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 2rem;
+  --space-lg: 4rem;
+  --space-xl: 7rem;
+
+  /* =========================
+     BORDES Y EFECTOS
+     ========================= */
+
+  --border-radius: 2px;
+  --transition: 0.3s ease;
+
+  --shadow-card: 0 15px 40px rgba(0, 0, 0, 0.45);
+}

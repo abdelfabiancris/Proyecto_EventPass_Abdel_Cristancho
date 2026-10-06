@@ -1,0 +1,208 @@
+/* =========================
+   FORMULARIOS
+   ========================= */
+
+.form-page {
+  min-height: calc(100vh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4rem 0;
+}
+
+/* =========================
+   CONTENEDOR
+   ========================= */
+
+.form-container {
+  width: min(460px, 90%);
+
+  padding: 3rem;
+
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+
+  box-shadow: var(--shadow-card);
+}
+
+/* =========================
+   ENCABEZADO
+   ========================= */
+
+.form-header {
+  margin-bottom: 2.5rem;
+}
+
+.form-eyebrow {
+  margin-bottom: 0.8rem;
+
+  color: var(--color-primary);
+
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.form-title {
+  margin-bottom: 0.8rem;
+
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.form-description {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* =========================
+   GRUPOS
+   ========================= */
+
+.form-group {
+  margin-bottom: 1.4rem;
+}
+
+.form-label {
+  display: block;
+
+  margin-bottom: 0.5rem;
+
+  color: var(--color-text);
+
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* =========================
+   CAMPOS
+   ========================= */
+
+.form-input {
+  width: 100%;
+
+  padding: 0.9rem 1rem;
+
+  background: #0d0d0d;
+  border: 1px solid var(--color-border);
+
+  color: var(--color-white);
+
+  outline: none;
+
+  transition: var(--transition);
+}
+
+.form-input::placeholder {
+  color: #555;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* =========================
+   SELECT
+   ========================= */
+
+.form-select {
+  appearance: none;
+}
+
+/* =========================
+   MENSAJES
+   ========================= */
+
+.form-message {
+  margin-bottom: 1.2rem;
+
+  padding: 0.8rem 1rem;
+
+  border: 1px solid var(--color-border);
+
+  font-size: var(--text-sm);
+}
+
+.form-message--error {
+  border-color: var(--color-primary);
+  color: #ff6b6b;
+}
+
+.form-message--success {
+  border-color: #4caf50;
+  color: #81c784;
+}
+
+/* =========================
+   BOTÓN
+   ========================= */
+
+.form-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* =========================
+   ENLACES
+   ========================= */
+
+.form-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+
+  border-top: 1px solid var(--color-border);
+
+  text-align: center;
+
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.form-link {
+  color: var(--color-white);
+
+  transition: var(--transition);
+}
+
+.form-link:hover {
+  color: var(--color-primary);
+}
+
+/* =========================
+   DOS CAMPOS
+   ========================= */
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 600px) {
+  .form-page {
+    padding: 2rem 0;
+  }
+
+  .form-container {
+    padding: 2rem 1.5rem;
+  }
+
+  .form-title {
+    font-size: 2rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
