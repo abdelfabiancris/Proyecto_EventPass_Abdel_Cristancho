@@ -179,8 +179,4 @@ window.addEventListener('hashchange', router);
 
 router();
 
-window.addEventListener('hashchange', router);
-
-router();
-
 initAssistantChat();

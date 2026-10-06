@@ -498,4 +498,8 @@ Hay **dos campos que deliberadamente dejé pendientes** para no inventar informa
 Nombre: Abdel Fabian Cristancho Roshman
 URL: https://proyecto-event-pass-abdel-cristanch.vercel.app/
 
+<<<<<<< HEAD
 El resto está basado en la arquitectura y funcionalidades que ya construimos, y en los requisitos oficiales del taller.
+=======
+El resto está basado en la arquitectura y funcionalidades que ya construimos, y en los requisitos oficiales del taller.
+>>>>>>> 83a8a16 (readme and main)
