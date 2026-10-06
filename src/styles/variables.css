@@ -1,54 +1,56 @@
 :root {
-  /* =========================
-     COLORES EVENTPASS
-     ========================= */
+  --color-bg: #0a0709;
+  --color-surface: #161215;
+  --color-surface-lowest: #110d10;
+  --color-surface-low: #1f1a1d;
+  --color-surface-mid: #231e21;
+  --color-surface-high: #2e282c;
+  --color-surface-highest: #393337;
 
-  --color-bg: #0a0a0a;
-  --color-bg-soft: #111111;
-  --color-bg-card: #161616;
+  --color-primary: #f2ca50;
+  --color-primary-strong: #d4af37;
+  --color-primary-soft: #e9c349;
+  --color-on-primary: #3c2f00;
 
-  --color-primary: #d62828;
-  --color-primary-hover: #ef3b3b;
+  --color-burgundy: #7d2a35;
+  --color-burgundy-deep: #5a0f1d;
+  --color-burgundy-soft: #ffb2b7;
 
-  --color-white: #f5f5f5;
-  --color-text: #dddddd;
-  --color-text-muted: #8c8c8c;
-  --color-border: #2a2a2a;
+  --color-amber: #ffc37b;
 
-  /* =========================
-     TIPOGRAFÍA
-     ========================= */
+  --color-text: #eae0e4;
+  --color-text-soft: #d0c5af;
+  --color-text-muted: #99907c;
+  --color-text-dim: #6e5d68;
 
-  --font-title: Georgia, "Times New Roman", serif;
-  --font-body: Arial, Helvetica, sans-serif;
+  --color-success: #6ee7a5;
+  --color-warning: #ffc04d;
+  --color-error: #ffb4ab;
 
-  /* =========================
-     TAMAÑOS
-     ========================= */
+  --color-border: rgba(242, 202, 80, 0.18);
+  --color-border-strong: rgba(242, 202, 80, 0.42);
+  --color-border-soft: rgba(234, 224, 228, 0.1);
 
-  --text-xs: 0.7rem;
-  --text-sm: 0.85rem;
-  --text-md: 1rem;
-  --text-lg: 1.3rem;
-  --text-xl: 2.5rem;
-  --text-hero: clamp(3rem, 7vw, 6rem);
+  --font-title: "Bodoni Moda", Georgia, "Times New Roman", serif;
+  --font-body: "Manrope", Arial, Helvetica, sans-serif;
 
-  /* =========================
-     ESPACIADO
-     ========================= */
+  --text-xs: 0.68rem;
+  --text-sm: 0.82rem;
+  --text-md: 0.95rem;
+  --text-lg: 1.15rem;
+  --text-xl: clamp(2.1rem, 4vw, 3rem);
+  --text-hero: clamp(3.4rem, 7vw, 6.7rem);
 
-  --space-xs: 0.5rem;
-  --space-sm: 1rem;
-  --space-md: 2rem;
-  --space-lg: 4rem;
-  --space-xl: 7rem;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 5rem;
+  --space-3xl: 7rem;
 
-  /* =========================
-     BORDES Y EFECTOS
-     ========================= */
-
-  --border-radius: 2px;
+  --container: 1440px;
+  --radius-sm: 0.14rem;
   --transition: 0.3s ease;
-
-  --shadow-card: 0 15px 40px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 18px 45px rgba(0, 0, 0, 0.4);
 }

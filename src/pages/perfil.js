@@ -683,87 +683,87 @@ async function loadUserProfile(page) {
 
 }
 
+function formatRegistrationDate(date) {
+  if (!date) {
+    return 'Fecha por confirmar';
+  }
 
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return date;
+  }
+
+  return new Intl.DateTimeFormat('es-CO', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed);
+}
 
 // =========================================================
 // CARGAR INSCRIPCIONES
 // =========================================================
 
 async function loadUserRegistrations(page) {
+  const sessionToken = localStorage.getItem(
+    'eventpass_session_token'
+  );
 
-  const sessionToken =
-    localStorage.getItem(
-      "eventpass_session_token"
-    );
+  const status = page.querySelector(
+    '#registrations-status'
+  );
 
-
-  const status =
-    page.querySelector(
-      "#registrations-status"
-    );
-
-
-  const list =
-    page.querySelector(
-      "#registrations-list"
-    );
-
+  const list = page.querySelector(
+    '#registrations-list'
+  );
 
   if (!sessionToken) {
-
     status.textContent =
-      "No hay una sesión válida.";
+      'No hay una sesión válida.';
 
     status.className =
-      "form-message form-message--error";
+      'form-message form-message--error';
 
     return;
   }
 
-
   try {
-
     status.textContent =
-      "Cargando tus inscripciones...";
+      'Consultando tus inscripciones...';
 
     status.className =
-      "form-message";
+      'form-message';
 
-
-    list.innerHTML = "";
-
+    list.innerHTML = '';
 
     const response =
       await getRegistrations(sessionToken);
 
-
     if (response?.ok === false) {
-
       throw new Error(
         response.mensaje ||
-        "No fue posible consultar tus inscripciones."
+          'No fue posible consultar tus inscripciones.'
       );
-
     }
-
 
     const inscripciones =
       Array.isArray(response?.inscripciones)
         ? response.inscripciones
         : [];
 
+    /* =========================================
+       SIN INSCRIPCIONES
+       ========================================= */
 
     if (inscripciones.length === 0) {
-
       status.textContent =
-        "Todavía no tienes inscripciones.";
+        'Todavía no tienes inscripciones.';
 
       status.className =
-        "form-message";
-
+        'form-message';
 
       list.innerHTML = `
-
         <div class="registration-empty">
 
           <span class="registration-empty__number">
@@ -780,192 +780,212 @@ async function loadUserRegistrations(page) {
           </p>
 
           <a
-            href="#eventos"
+            href="#agenda"
             class="btn btn-outline"
           >
-            Explorar eventos
+            Explorar eventos →
           </a>
 
         </div>
-
       `;
 
       return;
     }
 
+    /* =========================================
+       CONTADOR
+       ========================================= */
 
     status.textContent =
-      `${inscripciones.length} inscripción${
+      `${inscripciones.length} ${
         inscripciones.length === 1
-          ? ""
-          : "es"
+          ? 'inscripción'
+          : 'inscripciones'
       }`;
 
-
     status.className =
-      "form-message form-message--success";
+      'form-message form-message--success';
 
+    /* =========================================
+       TARJETAS
+       ========================================= */
 
-    inscripciones.forEach(
-      (inscripcion) => {
+    inscripciones.forEach((inscripcion) => {
+      const item =
+        document.createElement('article');
 
-        const item =
-          document.createElement("article");
+      item.className =
+        'registration-item';
 
+      const estado =
+        String(
+          inscripcion.estado || 'SIN ESTADO'
+        ).toUpperCase();
 
-        item.className =
-          "registration-item";
+      let estadoClass =
+        'registration-item__status';
 
+      let estadoLabel =
+        estado;
 
-        const estado =
-          inscripcion.estado || "";
+      if (estado === 'CONFIRMADA') {
+        estadoClass +=
+          ' registration-item__status--confirmed';
 
-
-        let estadoClass =
-          "registration-item__status";
-
-
-        if (estado === "CONFIRMADA") {
-
-          estadoClass +=
-            " registration-item__status--confirmed";
-
-        }
-
-
-        if (estado === "LISTA_ESPERA") {
-
-          estadoClass +=
-            " registration-item__status--waiting";
-
-        }
-
-
-        if (estado === "CANCELADA") {
-
-          estadoClass +=
-            " registration-item__status--cancelled";
-
-        }
-
-
-        item.innerHTML = `
-
-          <div class="registration-item__info">
-
-            <span class="registration-item__label">
-              Evento
-            </span>
-
-            <h3 class="registration-item__title">
-              ${inscripcion.evento_id || "Evento EventPass"}
-            </h3>
-
-
-            ${
-              inscripcion.nombre_acreditacion
-                ? `
-                  <p>
-                    A nombre de:
-                    <strong>
-                      ${inscripcion.nombre_acreditacion}
-                    </strong>
-                  </p>
-                `
-                : ""
-            }
-
-
-            ${
-              inscripcion.fecha_inscripcion
-                ? `
-                  <p>
-                    Inscripción:
-                    ${inscripcion.fecha_inscripcion}
-                  </p>
-                `
-                : ""
-            }
-
-          </div>
-
-
-          <div class="registration-item__actions">
-
-            <span class="${estadoClass}">
-              ${estado || "SIN ESTADO"}
-            </span>
-
-
-            ${
-              estado !== "CANCELADA"
-                ? `
-                  <button
-                    type="button"
-                    class="btn btn-outline registration-cancel-button"
-                    data-evento-id="${inscripcion.evento_id}"
-                  >
-                    Cancelar inscripción
-                  </button>
-                `
-                : ""
-            }
-
-          </div>
-
-        `;
-
-
-        const cancelButton =
-          item.querySelector(
-            ".registration-cancel-button"
-          );
-
-
-        if (cancelButton) {
-
-          cancelButton.addEventListener(
-            "click",
-            async () => {
-
-              await cancelUserRegistration(
-                page,
-                inscripcion.evento_id
-              );
-
-            }
-          );
-
-        }
-
-
-        list.appendChild(item);
-
+        estadoLabel =
+          'Confirmada';
       }
-    );
 
+      if (estado === 'LISTA_ESPERA') {
+        estadoClass +=
+          ' registration-item__status--waiting';
+
+        estadoLabel =
+          'Lista de espera';
+      }
+
+      if (estado === 'CANCELADA') {
+        estadoClass +=
+          ' registration-item__status--cancelled';
+
+        estadoLabel =
+          'Cancelada';
+      }
+
+      item.innerHTML = `
+        <div class="registration-item__top">
+
+          <span class="registration-item__label">
+            INSCRIPCIÓN
+          </span>
+
+          <span class="${estadoClass}">
+            ${estadoLabel}
+          </span>
+
+        </div>
+
+        <div class="registration-item__main">
+
+          <span class="registration-item__event-label">
+            Evento
+          </span>
+
+          <h3 class="registration-item__title">
+            ${
+              inscripcion.evento_nombre ||
+              inscripcion.evento_id ||
+              'Evento EventPass'
+            }
+          </h3>
+
+          ${
+            inscripcion.nombre_acreditacion
+              ? `
+                <p class="registration-item__guest">
+                  A nombre de
+                  <strong>
+                    ${inscripcion.nombre_acreditacion}
+                  </strong>
+                </p>
+              `
+              : ''
+          }
+
+        </div>
+
+        <div class="registration-item__meta">
+
+          ${
+            inscripcion.fecha_inscripcion
+              ? `
+                <div>
+                  <span>
+                    Fecha de inscripción
+                  </span>
+
+                  <strong>
+                    ${formatRegistrationDate(
+                      inscripcion.fecha_inscripcion
+                    )}
+                  </strong>
+                </div>
+              `
+              : ''
+          }
+
+          <div>
+            <span>
+              Estado
+            </span>
+
+            <strong>
+              ${estadoLabel}
+            </strong>
+          </div>
+
+        </div>
+
+        ${
+          estado !== 'CANCELADA'
+            ? `
+              <div class="registration-item__actions">
+
+                <button
+                  type="button"
+                  class="
+                    btn
+                    btn-outline
+                    registration-cancel-button
+                  "
+                  data-evento-id="${
+                    inscripcion.evento_id
+                  }"
+                >
+                  Cancelar inscripción
+                </button>
+
+              </div>
+            `
+            : ''
+        }
+      `;
+
+      const cancelButton =
+        item.querySelector(
+          '.registration-cancel-button'
+        );
+
+      if (cancelButton) {
+        cancelButton.addEventListener(
+          'click',
+          async () => {
+            await cancelUserRegistration(
+              page,
+              inscripcion.evento_id
+            );
+          }
+        );
+      }
+
+      list.appendChild(item);
+    });
 
   } catch (error) {
-
     console.error(
-      "Error cargando inscripciones:",
+      'Error cargando inscripciones:',
       error
     );
 
-
     status.textContent =
       error.message ||
-      "No fue posible cargar tus inscripciones.";
-
+      'No fue posible cargar tus inscripciones.';
 
     status.className =
-      "form-message form-message--error";
+      'form-message form-message--error';
 
-
-    list.innerHTML = "";
-
+    list.innerHTML = '';
   }
-
 }
 
 

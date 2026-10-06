@@ -1,0 +1,355 @@
+/* =========================================================
+   CINÉPASS · ASSISTANT
+   SOLO ESTILOS
+   ========================================================= */
+
+:root {
+  /* -------------------------------------------------------
+     PALETA
+     ------------------------------------------------------- */
+
+  --chat--color-primary: #d9af37;
+  --chat--color-primary-shade-50: #c49b28;
+  --chat--color-primary-shade-100: #a9821f;
+
+  --chat--color-secondary: #7b1f2d;
+  --chat--color-secondary-shade-50: #651824;
+  --chat--color-secondary-shade-100: #51131c;
+
+  --chat--color-white: #eee7d9;
+
+  --chat--color-light: #120f10;
+  --chat--color-light-shade-50: #191516;
+  --chat--color-light-shade-100: #241e20;
+
+  --chat--color-medium: #8e857a;
+
+  --chat--color-dark: #090708;
+
+  --chat--color-disabled: #5b5550;
+  --chat--color-typing: #d9af37;
+
+  /* -------------------------------------------------------
+     GENERALES
+     ------------------------------------------------------- */
+
+  --chat--spacing: 1rem;
+
+  --chat--border-radius: 0;
+
+  --chat--transition-duration: 0.25s;
+
+  --chat--font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  /* -------------------------------------------------------
+     VENTANA
+     ------------------------------------------------------- */
+
+  --chat--window--width: 380px;
+  --chat--window--height: 600px;
+
+  /* -------------------------------------------------------
+     HEADER
+     ------------------------------------------------------- */
+
+  --chat--header-height: auto;
+
+  --chat--header--padding:
+    1.15rem 1.2rem;
+
+  --chat--header--background:
+    #0b090a;
+
+  --chat--header--color:
+    #eee7d9;
+
+  --chat--header--border-top:
+    1px solid rgba(217, 175, 55, 0.18);
+
+  --chat--header--border-bottom:
+    1px solid rgba(217, 175, 55, 0.12);
+
+  --chat--heading--font-size:
+    1.1rem;
+
+  --chat--subtitle--font-size:
+    0.54rem;
+
+  --chat--subtitle--line-height:
+    1.5;
+
+  /* -------------------------------------------------------
+     MENSAJES
+     ------------------------------------------------------- */
+
+  --chat--message--font-size:
+    0.67rem;
+
+  --chat--message--padding:
+    0.72rem 0.82rem;
+
+  --chat--message--border-radius:
+    0;
+
+  --chat--message-line-height:
+    1.55;
+
+  --chat--message--bot--background:
+    #151112;
+
+  --chat--message--bot--color:
+    #ddd5c8;
+
+  --chat--message--bot--border:
+    1px solid rgba(217, 175, 55, 0.11);
+
+  --chat--message--user--background:
+    #7b1f2d;
+
+  --chat--message--user--color:
+    #f1e9dc;
+
+  --chat--message--user--border:
+    1px solid rgba(217, 175, 55, 0.06);
+
+  /* -------------------------------------------------------
+     INPUT
+     ------------------------------------------------------- */
+
+  --chat--textarea--height:
+    50px;
+
+  /* -------------------------------------------------------
+     BOTÓN FLOTANTE
+     ------------------------------------------------------- */
+
+  --chat--toggle--size:
+    56px;
+
+  --chat--toggle--border-radius:
+    50%;
+
+  --chat--toggle--background:
+    #d9af37;
+
+  --chat--toggle--hover--background:
+    #f0cf63;
+
+  --chat--toggle--active--background:
+    #c49b28;
+
+  --chat--toggle--color:
+    #17110a;
+}
+
+/* =========================================================
+   CONTENEDOR
+   ========================================================= */
+
+#n8n-chat {
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+}
+
+/* =========================================================
+   VENTANA
+   ========================================================= */
+
+.n8n-chat-window {
+  border:
+    1px solid
+    rgba(217, 175, 55, 0.24);
+
+  box-shadow:
+    0 25px 70px
+    rgba(0, 0, 0, 0.58);
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.n8n-chat-window .chat-header {
+  position:
+    relative;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0b090a 0%,
+      #100d0e 100%
+    );
+}
+
+/* línea dorada superior */
+
+.n8n-chat-window .chat-header::before {
+  content:
+    '';
+
+  position:
+    absolute;
+
+  top:
+    0;
+
+  left:
+    0;
+
+  width:
+    100%;
+
+  height:
+    2px;
+
+  background:
+    #d9af37;
+
+  box-shadow:
+    0 0 12px
+    rgba(217, 175, 55, 0.42);
+}
+
+/* =========================================================
+   TÍTULOS
+   ========================================================= */
+
+.n8n-chat-window .chat-heading {
+  font-family:
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  font-weight:
+    500;
+
+  letter-spacing:
+    -0.02em;
+}
+
+.n8n-chat-window .chat-subtitle {
+  color:
+    rgba(149, 141, 130, 0.72);
+}
+
+/* =========================================================
+   CUERPO
+   ========================================================= */
+
+.n8n-chat-window .chat-body {
+  background:
+    radial-gradient(
+      circle at 85% 10%,
+      rgba(217, 175, 55, 0.025),
+      transparent 25%
+    ),
+    #120f10;
+}
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.n8n-chat-window .chat-message {
+  box-shadow:
+    none;
+}
+
+.n8n-chat-window .chat-message--bot {
+  position:
+    relative;
+}
+
+.n8n-chat-window .chat-message--bot::before {
+  content:
+    '';
+
+  position:
+    absolute;
+
+  left:
+    0;
+
+  top:
+    0;
+
+  bottom:
+    0;
+
+  width:
+    1px;
+
+  background:
+    rgba(217, 175, 55, 0.55);
+}
+
+/* usuario */
+
+.n8n-chat-window .chat-message--user {
+  box-shadow:
+    0 8px 20px
+    rgba(0, 0, 0, 0.18);
+}
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.n8n-chat-window textarea {
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  color:
+    #eee7d9;
+}
+
+.n8n-chat-window textarea::placeholder {
+  color:
+    rgba(84, 78, 72, 0.72);
+}
+
+/* =========================================================
+   PIE / INPUT
+   ========================================================= */
+
+.n8n-chat-window .chat-footer {
+  background:
+    #0b090a;
+
+  border-top:
+    1px solid
+    rgba(217, 175, 55, 0.12);
+}
+
+/* =========================================================
+   BOTÓN FLOTANTE
+   ========================================================= */
+
+.n8n-chat-window + button {
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.35),
+    0 0 18px
+    rgba(217, 175, 55, 0.12);
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  :root {
+    --chat--window--width:
+      calc(100vw - 18px);
+
+    --chat--window--height:
+      78vh;
+  }
+}

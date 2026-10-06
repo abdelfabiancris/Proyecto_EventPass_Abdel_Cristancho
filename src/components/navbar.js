@@ -12,49 +12,52 @@ export function createNavbar() {
   navbar.innerHTML = `
     <div class="navbar__container">
 
-      <a href="#" class="navbar__logo">
+      <!-- LOGO -->
+      <a
+        href="#inicio"
+        class="navbar__logo"
+        aria-label="CinéPass inicio"
+      >
         <span class="navbar__logo-main">
-          EventPass
+          CINÉPASS
         </span>
 
         <span class="navbar__logo-sub">
-          Cine · Eventos · Experiencias
+          CINE · EVENTOS · EXPERIENCIAS
         </span>
       </a>
 
-      <nav>
-        <ul class="navbar__menu">
+      <!-- NAVEGACIÓN -->
+      <nav
+        class="navbar__nav"
+        aria-label="Navegación principal"
+      >
+        <a
+          href="#inicio"
+          class="navbar__link"
+          data-route="inicio"
+        >
+          Inicio
+        </a>
 
-          <li>
-            <a
-              href="#"
-              class="navbar__link"
-            >
-              Inicio
-            </a>
-          </li>
+        <a
+          href="#agenda"
+          class="navbar__link"
+          data-route="agenda"
+        >
+          Eventos
+        </a>
 
-          <li>
-            <a
-              href="#eventos"
-              class="navbar__link"
-            >
-              Eventos
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="#categorias"
-              class="navbar__link"
-            >
-              Categorías
-            </a>
-          </li>
-
-        </ul>
+        <a
+          href="#categorias"
+          class="navbar__link"
+          data-route="categorias"
+        >
+          Categorías
+        </a>
       </nav>
 
+      <!-- ACCIONES -->
       <div class="navbar__actions">
 
         ${
@@ -63,13 +66,14 @@ export function createNavbar() {
               <a
                 href="#perfil"
                 class="navbar__login"
+                data-route="perfil"
               >
                 Mi perfil
               </a>
 
               <button
                 type="button"
-                class="btn"
+                class="navbar__button navbar__button--ghost"
                 id="logout-button"
               >
                 Cerrar sesión
@@ -78,135 +82,289 @@ export function createNavbar() {
             : `
               <a
                 href="#login"
-                class="navbar__link navbar__login"
+                class="navbar__login"
+                data-route="login"
               >
                 Iniciar sesión
               </a>
 
               <a
                 href="#registro"
-                class="btn"
+                class="navbar__button"
               >
                 Registrarme
               </a>
             `
         }
 
+        <!-- MENU MOBILE -->
         <button
           type="button"
           class="navbar__toggle"
           aria-label="Abrir menú"
+          aria-expanded="false"
         >
-          ☰
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
 
       </div>
+    </div>
 
+    <!-- MENU MOBILE -->
+    <div
+      class="navbar__mobile-menu"
+      aria-hidden="true"
+    >
+      <a
+        href="#inicio"
+        class="navbar__mobile-link"
+        data-route="inicio"
+      >
+        Inicio
+      </a>
+
+      <a
+        href="#agenda"
+        class="navbar__mobile-link"
+        data-route="agenda"
+      >
+        Eventos
+      </a>
+
+      <a
+        href="#categorias"
+        class="navbar__mobile-link"
+        data-route="categorias"
+      >
+        Categorías
+      </a>
+
+      ${
+        sessionToken
+          ? `
+            <a
+              href="#perfil"
+              class="navbar__mobile-link"
+              data-route="perfil"
+            >
+              Mi perfil
+            </a>
+          `
+          : `
+            <a
+              href="#login"
+              class="navbar__mobile-link"
+              data-route="login"
+            >
+              Iniciar sesión
+            </a>
+
+            <a
+              href="#registro"
+              class="navbar__mobile-link navbar__mobile-link--accent"
+              data-route="registro"
+            >
+              Registrarme
+            </a>
+          `
+      }
     </div>
   `;
 
-// =========================
-// NAVEGACIÓN ACTIVA
-// =========================
+  /* =========================================
+     RUTA ACTUAL
+     ========================================= */
 
-const currentHash = window.location.hash;
+  const currentHash = window.location.hash;
 
-const navLinks = navbar.querySelectorAll(
-  '.navbar__link'
-);
+  function getCurrentRoute() {
+    if (
+      currentHash === '' ||
+      currentHash === '#' ||
+      currentHash === '#inicio'
+    ) {
+      return 'inicio';
+    }
 
-// Quitar estado activo de todos
-navLinks.forEach((link) => {
-  link.classList.remove('navbar__link--active');
-});
+    if (
+      currentHash === '#agenda' ||
+      currentHash.startsWith('#evento?')
+    ) {
+      return 'agenda';
+    }
 
-// =========================
-// DETERMINAR PÁGINA ACTIVA
-// =========================
+    if (currentHash === '#categorias') {
+      return 'categorias';
+    }
 
-let activeSelector = null;
+    if (currentHash === '#login') {
+      return 'login';
+    }
 
-if (
-  currentHash === '#eventos' ||
-  currentHash.startsWith('#evento?')
-) {
-  activeSelector = 'a[href="#eventos"]';
+    if (currentHash === '#registro') {
+      return 'registro';
+    }
 
-} else if (
-  currentHash === '#categorias'
-) {
-  activeSelector = 'a[href="#categorias"]';
+    if (currentHash === '#perfil') {
+      return 'perfil';
+    }
 
-} else if (
-  currentHash === '#login'
-) {
-  activeSelector = 'a[href="#login"]';
+    return '';
+  }
 
-} else {
-  // Cualquier otra situación corresponde al inicio
-  activeSelector = 'nav a[href="#"]';
-}
+  const currentRoute = getCurrentRoute();
 
-// =========================
-// APLICAR ESTADO ACTIVO
-// =========================
+  /* =========================================
+     NAVEGACIÓN DESKTOP
+     ========================================= */
 
-const activeLink = navbar.querySelector(
-  activeSelector
-);
+  const routeLinks =
+    navbar.querySelectorAll('[data-route]');
 
-if (activeLink) {
-  activeLink.classList.add(
-    'navbar__link--active'
+  routeLinks.forEach((link) => {
+    const isActive =
+      link.dataset.route === currentRoute;
+
+    link.classList.toggle(
+      'navbar__link--active',
+      isActive
+    );
+
+    link.classList.toggle(
+      'navbar__login--active',
+      isActive &&
+        link.classList.contains('navbar__login')
+    );
+
+    if (isActive) {
+      link.setAttribute(
+        'aria-current',
+        'page'
+      );
+    } else {
+      link.removeAttribute(
+        'aria-current'
+      );
+    }
+  });
+
+  /* =========================================
+     MENU MOBILE
+     ========================================= */
+
+  const toggle =
+    navbar.querySelector(
+      '.navbar__toggle'
+    );
+
+  const mobileMenu =
+    navbar.querySelector(
+      '.navbar__mobile-menu'
+    );
+
+  toggle?.addEventListener(
+    'click',
+    () => {
+      const isOpen =
+        mobileMenu.classList.toggle(
+          'navbar__mobile-menu--open'
+        );
+
+      toggle.classList.toggle(
+        'navbar__toggle--open',
+        isOpen
+      );
+
+      toggle.setAttribute(
+        'aria-expanded',
+        String(isOpen)
+      );
+
+      mobileMenu.setAttribute(
+        'aria-hidden',
+        String(!isOpen)
+      );
+    }
   );
-}
 
-  // =========================
-  // CERRAR SESIÓN
-  // =========================
+  mobileMenu
+    ?.querySelectorAll('a')
+    .forEach((link) => {
+      link.addEventListener(
+        'click',
+        () => {
+          mobileMenu.classList.remove(
+            'navbar__mobile-menu--open'
+          );
 
-  const logoutButton = navbar.querySelector(
-    '#logout-button'
-  );
+          toggle.classList.remove(
+            'navbar__toggle--open'
+          );
 
-  if (logoutButton) {
-    logoutButton.addEventListener(
-      'click',
-      async () => {
-        const token = localStorage.getItem(
+          toggle.setAttribute(
+            'aria-expanded',
+            'false'
+          );
+
+          mobileMenu.setAttribute(
+            'aria-hidden',
+            'true'
+          );
+        }
+      );
+    });
+
+  /* =========================================
+     LOGOUT
+     ========================================= */
+
+  const logoutButton =
+    navbar.querySelector(
+      '#logout-button'
+    );
+
+  logoutButton?.addEventListener(
+    'click',
+    async () => {
+      const token =
+        localStorage.getItem(
           'eventpass_session_token'
         );
 
-        try {
-          logoutButton.disabled = true;
-          logoutButton.textContent = 'Saliendo...';
+      try {
+        logoutButton.disabled = true;
 
-          if (token) {
-            await logoutUser(token);
-          }
-        } catch (error) {
-          console.error(
-            'Error cerrando sesión:',
-            error
-          );
-        } finally {
-          localStorage.removeItem(
-            'eventpass_session_token'
-          );
+        logoutButton.textContent =
+          'Saliendo...';
 
-          localStorage.removeItem(
-            'eventpass_usuario_id'
-          );
-
-          localStorage.removeItem(
-            'eventpass_session_id'
-          );
-
-          window.location.hash = '#login';
+        if (token) {
+          await logoutUser(token);
         }
+      } catch (error) {
+        console.error(
+          'Error cerrando sesión:',
+          error
+        );
+      } finally {
+        localStorage.removeItem(
+          'eventpass_session_token'
+        );
+
+        localStorage.removeItem(
+          'eventpass_usuario_id'
+        );
+
+        localStorage.removeItem(
+          'eventpass_session_id'
+        );
+
+        window.location.hash =
+          '#login';
       }
-    );
-  }
+    }
+  );
 
   return navbar;
 }
