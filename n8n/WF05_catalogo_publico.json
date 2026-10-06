@@ -1,0 +1,390 @@
+{
+  "name": "WF05_catalogo_publico",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eventpass/catalogo",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "http://localhost:5173"
+        }
+      },
+      "id": "32cff760-8f37-4342-9c66-8f4f7d8a9984",
+      "name": "Webhook - Catálogo público",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -464,
+        144
+      ],
+      "webhookId": "eventpass-catalogo"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body ?? $json;\nconst operation = String(body.operation ?? 'LISTADO').trim().toUpperCase();\nconst allowed = ['LISTADO','DETALLE','FILTRO'];\n\nif (!allowed.includes(operation)) {\n  return [{json:{ok:false,error:'OPERACION_INVALIDA',message:'operation debe ser LISTADO, DETALLE o FILTRO',status_http:400}}];\n}\n\nconst evento_id = String(body.evento_id ?? '').trim();\nconst categoria = String(body.categoria ?? '').trim();\nconst visitor_id = String(body.visitor_id ?? '').trim();\n\nif (operation === 'DETALLE' && !evento_id) {\n  return [{json:{ok:false,error:'EVENTO_ID_REQUERIDO',message:'evento_id es obligatorio para DETALLE',status_http:400}}];\n}\n\nif (operation === 'FILTRO' && !categoria) {\n  return [{json:{ok:false,error:'CATEGORIA_REQUERIDA',message:'categoria es obligatoria para FILTRO',status_http:400}}];\n}\n\nreturn [{json:{ok:true,operation,evento_id,categoria,visitor_id,status_http:200}}];"
+      },
+      "id": "49028bf2-4897-4326-9806-df6861e65178",
+      "name": "Validar consulta catálogo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8",
+          "mode": "list",
+          "cachedResultName": "EP04_Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "8bf114d9-b26a-48e9-8b7f-6b208773266d",
+      "name": "Consultar eventos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "f702501b-b51b-4b0b-ab74-ed8a99714fac",
+      "name": "Consultar inscripciones confirmadas",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        288
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "5ee7c29a-cb3b-43f3-8153-71d9fa926bbb",
+      "name": "Unir eventos e inscripciones",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        272,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const request = $('Validar consulta catálogo').first().json;\nif (request.ok !== true) return [{json:request}];\n\nconst rows = $input.all().map(i => i.json);\nconst events = [];\nconst registrations = [];\n\nfor (const row of rows) {\n  if (row && row.evento_id && row.nombre !== undefined && row.capacidad !== undefined) {\n    events.push(row);\n  } else if (row && row.inscripcion_id && row.evento_id) {\n    registrations.push(row);\n  }\n}\n\nconst confirmedByEvent = {};\n\nfor (const r of registrations) {\n  if (String(r.estado ?? '').toUpperCase() === 'CONFIRMADA') {\n    confirmedByEvent[r.evento_id] = (confirmedByEvent[r.evento_id] || 0) + 1;\n  }\n}\n\nconst publishable = events.filter(e =>\n  String(e.estado ?? '').toUpperCase() === 'PUBLICADO'\n);\n\nlet selected = publishable;\n\nif (request.operation === 'DETALLE') {\n  selected = publishable.filter(e => String(e.evento_id) === request.evento_id);\n} else if (request.operation === 'FILTRO') {\n  selected = publishable.filter(e =>\n    String(e.categoria ?? '').toLowerCase() === request.categoria.toLowerCase()\n  );\n}\n\nconst catalog = selected.map(e => {\n  const capacidad = Number(e.capacidad) || 0;\n  const confirmadas = confirmedByEvent[e.evento_id] || 0;\n  const cupos_disponibles = Math.max(0, capacidad - confirmadas);\n\n  return {\n    evento_id: e.evento_id,\n    nombre: e.nombre,\n    categoria: e.categoria,\n    descripcion: e.descripcion,\n    fecha: e.fecha,\n    hora: e.hora,\n    lugar: e.lugar,\n    capacidad,\n    cupos_confirmados: confirmadas,\n    cupos_disponibles,\n    disponible: cupos_disponibles > 0,\n    imagen_url: e.imagen_url,\n    organizador: e.organizador,\n    estado: e.estado\n  };\n});\n\nconst now = new Date().toISOString();\nconst consulta_id =\n  'CAT-' +\n  Math.random().toString(36).slice(2,10).toUpperCase() +\n  Date.now().toString(36).slice(-4).toUpperCase();\n\nreturn [{\n  json: {\n    ok: true,\n    status_http: 200,\n    consulta_id,\n    fecha: now,\n    tipo: request.operation,\n    evento_id: request.evento_id || '',\n    categoria: request.categoria || '',\n    resultado_count: catalog.length,\n    visitor_id: request.visitor_id || '',\n    eventos: catalog\n  }\n}];"
+      },
+      "id": "53911f25-7ee6-4734-b664-25089e463062",
+      "name": "Calcular catálogo y disponibilidad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "13-utONFjRnCgwWoZBfzP3utajY4_WakzEvs_Lc5NC8s",
+          "mode": "list",
+          "cachedResultName": "EP05_Catalogo_Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13-utONFjRnCgwWoZBfzP3utajY4_WakzEvs_Lc5NC8s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Consultas_Catalogo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13-utONFjRnCgwWoZBfzP3utajY4_WakzEvs_Lc5NC8s/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "consulta_id": "={{ $json.consulta_id }}",
+            "fecha": "={{ $json.fecha }}",
+            "tipo": "={{ $json.tipo }}",
+            "evento_id": "={{ $json.evento_id }}",
+            "categoria": "={{ $json.categoria }}",
+            "resultado_count": "={{ $json.resultado_count }}",
+            "visitor_id": "={{ $json.visitor_id }}",
+            "status_http": "={{ $json.status_http }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "consulta_id",
+              "displayName": "consulta_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resultado_count",
+              "displayName": "resultado_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "visitor_id",
+              "displayName": "visitor_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status_http",
+              "displayName": "status_http",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "7a1007c2-1019-486d-bf68-2be3e691e310",
+      "name": "Registrar consulta catálogo",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        768,
+        144
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "00131433-5aaa-48e0-86f7-df787234dbfe",
+      "name": "Respuesta JSON catálogo",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1248,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const catalogo =\n  $('Calcular catálogo y disponibilidad')\n    .first()\n    .json;\n\nreturn [\n  {\n    json: catalogo\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        144
+      ],
+      "id": "c51709a3-1630-469a-9472-a22b9d883ea3",
+      "name": "Preparar respuesta catálogo"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Catálogo público": {
+      "main": [
+        [
+          {
+            "node": "Validar consulta catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar consulta catálogo": {
+      "main": [
+        [
+          {
+            "node": "Consultar eventos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar inscripciones confirmadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar eventos": {
+      "main": [
+        [
+          {
+            "node": "Unir eventos e inscripciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar inscripciones confirmadas": {
+      "main": [
+        [
+          {
+            "node": "Unir eventos e inscripciones",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unir eventos e inscripciones": {
+      "main": [
+        [
+          {
+            "node": "Calcular catálogo y disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular catálogo y disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Registrar consulta catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar consulta catálogo": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta catálogo": {
+      "main": [
+        [
+          {
+            "node": "Respuesta JSON catálogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "920b4475-3da9-4884-9c31-04e6f15c5548",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"
+  },
+  "nodeGroups": [],
+  "id": "Qt4ABiMFg9p9pDqR",
+  "tags": []
+}

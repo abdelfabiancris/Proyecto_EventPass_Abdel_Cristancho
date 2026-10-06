@@ -1,0 +1,1182 @@
+{
+  "name": "WF06_inscripciones_crud",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eventpass/inscripciones",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "http://localhost:5173"
+        }
+      },
+      "id": "541479dd-60da-42bd-84cc-fd0f2b68d5dc",
+      "name": "Webhook - Inscripciones",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -448,
+        240
+      ],
+      "webhookId": "452cc081-4d81-4d04-8ec4-d6d8bd93acad"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$json.body??$json; const operation=String(b.operation??'CREATE').toUpperCase();\nif(!['CREATE','READ','UPDATE','CANCEL'].includes(operation)) return [{json:{ok:false,error:'OPERACION_INVALIDA',status_http:400}}];\nif(!b.session_token) return [{json:{ok:false,error:'SESSION_TOKEN_REQUERIDO',status_http:401}}];\nreturn [{json:{...b,operation,session_token:String(b.session_token).trim()}}];"
+      },
+      "id": "30b990b6-30f8-47a1-9ef5-bf20d946f76b",
+      "name": "Validar solicitud",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1NA7WmJ3FVjFNGbU1IQvGs-KrnZQfdUnv2O5j_Q2tueI",
+          "mode": "list",
+          "cachedResultName": "EP02_Sesiones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NA7WmJ3FVjFNGbU1IQvGs-KrnZQfdUnv2O5j_Q2tueI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sesiones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NA7WmJ3FVjFNGbU1IQvGs-KrnZQfdUnv2O5j_Q2tueI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "d793dea1-2da8-4e7b-84db-8500c4c237c1",
+      "name": "Consultar sesiones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1USloxUQP3QwguDauFB8VqvyYU1eFCmwc8Eewi-43qMs",
+          "mode": "list",
+          "cachedResultName": "EP01_Usuarios",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1USloxUQP3QwguDauFB8VqvyYU1eFCmwc8Eewi-43qMs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Usuarios",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1USloxUQP3QwguDauFB8VqvyYU1eFCmwc8Eewi-43qMs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "3099d768-164d-486d-a702-f9c2f645235e",
+      "name": "Consultar usuarios",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        160
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "194lLVmXltfOcifciNs-7Yhfza86WsV0XrzogPC-ILWs",
+          "mode": "list",
+          "cachedResultName": "EP03_Telegram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/194lLVmXltfOcifciNs-7Yhfza86WsV0XrzogPC-ILWs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1954743745,
+          "mode": "list",
+          "cachedResultName": "Vinculaciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/194lLVmXltfOcifciNs-7Yhfza86WsV0XrzogPC-ILWs/edit#gid=1954743745"
+        },
+        "options": {}
+      },
+      "id": "d8f2202e-70c5-4a1b-9538-00a29c9e6b9a",
+      "name": "Consultar Telegram",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8",
+          "mode": "list",
+          "cachedResultName": "EP04_Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "e359690c-47da-41f6-a63f-d0980a534850",
+      "name": "Consultar eventos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "12ffafec-23a4-4a51-b123-46b5ea156aab",
+      "name": "Consultar inscripciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        0,
+        640
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const req = $('Validar solicitud').first().json;\nconst rows = $input.all().map(item => item.json);\n\nif (req.ok === false) {\n  return [\n    {\n      json: {\n        ...req,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// SESIÓN VÁLIDA\n// =========================================================\n\nconst session = rows.find(\n  row =>\n    row.session_token !== undefined &&\n    String(row.session_token) === String(req.session_token) &&\n    String(row.estado).toUpperCase() === 'ACTIVA'\n);\n\nif (!session) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'SESSION_INVALIDA',\n        status_http: 401,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// USUARIO ACTIVO\n// =========================================================\n\nconst user = rows.find(\n  row =>\n    String(row.usuario_id) === String(session.usuario_id) &&\n    row.email_normalizado !== undefined\n);\n\nif (!user || String(user.estado).toUpperCase() !== 'ACTIVO') {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'USUARIO_INACTIVO',\n        status_http: 403,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// EVENTOS DISPONIBLES EN LOS DATOS DEL MERGE\n// =========================================================\n\nconst events = rows.filter(\n  row =>\n    row.evento_id &&\n    row.nombre !== undefined &&\n    row.capacidad !== undefined\n);\n\n// =========================================================\n// READ\n// =========================================================\n\nif (req.operation === 'READ') {\n  const userRegistrations = rows\n    .filter(\n      row =>\n        row.inscripcion_id &&\n        String(row.usuario_id) ===\n          String(user.usuario_id)\n    )\n    .map(registration => {\n\n      const event = events.find(\n        eventRow =>\n          String(eventRow.evento_id) ===\n          String(registration.evento_id)\n      );\n\n      return {\n        ...registration,\n\n        evento_nombre:\n          event?.nombre ||\n          registration.evento_id ||\n          'Evento EventPass'\n      };\n    });\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'READ',\n        usuario_id: user.usuario_id,\n        inscripciones: userRegistrations,\n        status_http: 200,\n        route: 'READ'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR EVENTO\n// =========================================================\n\nconst event = events.find(\n  row =>\n    String(row.evento_id) ===\n      String(req.evento_id)\n);\n\nif (!event) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'EVENTO_NO_ENCONTRADO',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// INSCRIPCIONES DEL EVENTO\n// =========================================================\n\nconst registrations = rows.filter(\n  row =>\n    row.inscripcion_id &&\n    String(row.evento_id) ===\n      String(req.evento_id)\n);\n\n// =========================================================\n// CREATE\n// =========================================================\n\nif (req.operation === 'CREATE') {\n\n  const telegramLinked = rows.some(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      row.chat_id &&\n      String(row.estado).toUpperCase() === 'ACTIVA'\n  );\n\n  if (!telegramLinked) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'TELEGRAM_NO_VINCULADO',\n          status_http: 403,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  if (\n    String(event.estado).toUpperCase() !==\n    'PUBLICADO'\n  ) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'EVENTO_NO_DISPONIBLE',\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const duplicate = registrations.find(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      String(row.estado).toUpperCase() !==\n        'CANCELADA'\n  );\n\n  if (duplicate) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'INSCRIPCION_DUPLICADA',\n          inscripcion_id:\n            duplicate.inscripcion_id,\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const confirmed = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'CONFIRMADA'\n  ).length;\n\n  const state =\n    confirmed < Number(event.capacidad)\n      ? 'CONFIRMADA'\n      : 'LISTA_ESPERA';\n\n  const waiting = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'LISTA_ESPERA'\n  ).length;\n\n  const now =\n    new Date().toISOString();\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CREATE',\n\n        inscripcion_id:\n          'INS-' +\n          Math.random()\n            .toString(36)\n            .slice(2, 10)\n            .toUpperCase(),\n\n        usuario_id:\n          user.usuario_id,\n\n        evento_id:\n          event.evento_id,\n\n        evento_nombre:\n          event.nombre,\n\n        estado:\n          state,\n\n        fecha_inscripcion:\n          now,\n\n        fecha_actualizacion:\n          now,\n\n        nombre_acreditacion:\n          req.nombre_acreditacion ||\n          user.nombre,\n\n        observaciones:\n          req.observaciones ||\n          '',\n\n        origen:\n          req.origen ||\n          'WEB',\n\n        orden_espera:\n          state === 'LISTA_ESPERA'\n            ? waiting + 1\n            : '',\n\n        status_http: 201,\n\n        route: 'CREATE'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR INSCRIPCIÓN ACTIVA\n// =========================================================\n\nconst current = registrations.find(\n  row =>\n    String(row.usuario_id) ===\n      String(user.usuario_id) &&\n    String(row.estado).toUpperCase() !==\n      'CANCELADA'\n);\n\nif (!current) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'INSCRIPCION_NO_ENCONTRADA',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// CANCEL\n// =========================================================\n\nif (req.operation === 'CANCEL') {\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CANCEL',\n        inscripcion_id:\n          current.inscripcion_id,\n        usuario_id:\n          user.usuario_id,\n        evento_id:\n          event.evento_id,\n        evento_nombre:\n          event.nombre,\n        estado:\n          'CANCELADA',\n        fecha_actualizacion:\n          new Date().toISOString(),\n        status_http: 200,\n        route: 'CANCEL'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// UPDATE\n// =========================================================\n\nreturn [\n  {\n    json: {\n      ok: true,\n      operation: 'UPDATE',\n\n      inscripcion_id:\n        current.inscripcion_id,\n\n      usuario_id:\n        user.usuario_id,\n\n      evento_id:\n        event.evento_id,\n\n      evento_nombre:\n        event.nombre,\n\n      estado:\n        current.estado,\n\n      fecha_inscripcion:\n        current.fecha_inscripcion,\n\n      fecha_actualizacion:\n        new Date().toISOString(),\n\n      nombre_acreditacion:\n        req.nombre_acreditacion ||\n        current.nombre_acreditacion,\n\n      observaciones:\n        req.observaciones ||\n        current.observaciones,\n\n      origen:\n        current.origen,\n\n      orden_espera:\n        current.orden_espera,\n\n      status_http: 200,\n\n      route: 'UPDATE'\n    }\n  }\n];"
+      },
+      "id": "59f4aa7d-f84c-47ae-949e-73b06dcd4337",
+      "name": "Procesar inscripción",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "inscripcion_id": "={{$json.inscripcion_id}}",
+            "usuario_id": "={{$json.usuario_id}}",
+            "evento_id": "={{$json.evento_id}}",
+            "estado": "={{$json.estado}}",
+            "fecha_inscripcion": "={{$json.fecha_inscripcion}}",
+            "fecha_actualizacion": "={{$json.fecha_actualizacion}}",
+            "nombre_acreditacion": "={{$json.nombre_acreditacion}}",
+            "observaciones": "={{$json.observaciones}}",
+            "origen": "={{$json.origen}}",
+            "orden_espera": "={{$json.orden_espera}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_inscripcion",
+              "displayName": "fecha_inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_acreditacion",
+              "displayName": "nombre_acreditacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orden_espera",
+              "displayName": "orden_espera",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "66478df9-0880-4caf-92f3-18b5e9adf157",
+      "name": "Guardar inscripción",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1248,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "fcf775f0-ebac-4fa9-8450-bde275082891",
+      "name": "Respuesta JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1488,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e0704b7b-4170-488e-bdc2-212284397256",
+              "leftValue": "={{ $json.operation === \"CREATE\" }}",
+              "rightValue": "CREATE",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        240
+      ],
+      "id": "616fef1a-1a7d-43ef-b8ee-36f88317e869",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "READ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "be70ff66-86bd-4780-955b-6735e2c172b6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "READ"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "df3beab1-de8c-42c8-9b86-2c76b6858efe",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "UPDATE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "UPDATE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "312ea98f-2aa8-4d33-b783-d4af9552d200",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "CANCEL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CANCEL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "185f0b98-1df0-4f15-81bf-040e0eeb0b77",
+                    "leftValue": "={{ $json.route }}",
+                    "rightValue": "ERROR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ERROR"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1072,
+        560
+      ],
+      "id": "5061d19c-80b5-498d-b05a-35f4d5be55d9",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1632,
+        368
+      ],
+      "id": "ac66d460-37cb-4f02-a7af-c13d9dd07912",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "inscripcion_id": "={{ $json.inscripcion_id }}",
+            "estado": "CANCELADA",
+            "fecha_actualizacion": "={{ $json.fecha_actualizacion }}"
+          },
+          "matchingColumns": [
+            "inscripcion_id"
+          ],
+          "schema": [
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_inscripcion",
+              "displayName": "fecha_inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_acreditacion",
+              "displayName": "nombre_acreditacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orden_espera",
+              "displayName": "orden_espera",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        656
+      ],
+      "id": "a31826b5-4315-4f30-9215-6a6d27656a36",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "inscripcion_id": "={{ $json.inscripcion_id }}",
+            "nombre_acreditacion": "={{ $json.nombre_acreditacion }}",
+            "observaciones": "={{ $json.observaciones }}",
+            "fecha_actualizacion": "={{ $json.fecha_actualizacion }}"
+          },
+          "matchingColumns": [
+            "inscripcion_id"
+          ],
+          "schema": [
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_inscripcion",
+              "displayName": "fecha_inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nombre_acreditacion",
+              "displayName": "nombre_acreditacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "observaciones",
+              "displayName": "observaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "origen",
+              "displayName": "origen",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "orden_espera",
+              "displayName": "orden_espera",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        544
+      ],
+      "id": "d1dd47e5-67bb-410c-9874-7cff6b7fc4e9",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1824,
+        752
+      ],
+      "id": "0f63b481-6529-4958-b41c-3e6cd4a7d795",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1520,
+        848
+      ],
+      "id": "0a2357a1-4e6b-46ed-82a2-0d43e0c8535a",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "=={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2000,
+        544
+      ],
+      "id": "012e64d1-6eec-4747-ab7b-4dfb65ea462a",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        176,
+        48
+      ],
+      "id": "2460ecfb-0c18-40b0-88dc-255ac7919447",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        256,
+        336
+      ],
+      "id": "00bc5ed5-ab78-4fe9-8406-f4aefd6710c6",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        400,
+        480
+      ],
+      "id": "050ae2d3-cbb9-476b-8344-70497cb54b79",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        480,
+        704
+      ],
+      "id": "b32212b2-2204-4424-9f5e-78ab1e0121dd",
+      "name": "Merge3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Inscripciones": {
+      "main": [
+        [
+          {
+            "node": "Validar solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar solicitud": {
+      "main": [
+        [
+          {
+            "node": "Consultar sesiones",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar usuarios",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar eventos",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar inscripciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar sesiones": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar usuarios": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Consultar Telegram": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Consultar eventos": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Consultar inscripciones": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Procesar inscripción": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar inscripción": {
+      "main": [
+        [
+          {
+            "node": "Respuesta JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Guardar inscripción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Merge3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge3": {
+      "main": [
+        [
+          {
+            "node": "Procesar inscripción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "57a9691c-af1c-4fe7-9239-e3e518af1e5b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"
+  },
+  "nodeGroups": [],
+  "id": "N6FB4zTK79CIxcNH",
+  "tags": []
+}
