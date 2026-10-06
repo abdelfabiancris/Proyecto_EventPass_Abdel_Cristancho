@@ -201,6 +201,23 @@ export async function requestTelegramLink({
   });
 }
 
+export async function getTelegramStatus({
+  usuarioId,
+  sessionToken
+}) {
+  return request(N8N_WF03_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      operation: "ESTADO",
+      usuario_id: usuarioId,
+      session_token: sessionToken
+    })
+  });
+}
+
 export async function createRegistration({
   sessionToken,
   eventoId,

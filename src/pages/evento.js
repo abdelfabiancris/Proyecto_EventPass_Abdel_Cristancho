@@ -80,6 +80,51 @@ async function loadEvent(page) {
 
 function renderEvent(container, event) {
   const disponibilidad = Number(event.cupos_disponibles ?? 0);
+  const estado = String(event.estado || "").toUpperCase();
+
+  let buttonHTML = "";
+
+  if (estado === "CANCELADO") {
+    buttonHTML = `
+      <button
+        type="button"
+        class="btn event-detail__button"
+        disabled
+      >
+        Evento cancelado
+      </button>
+    `;
+  } else if (estado === "PUBLICADO" && disponibilidad > 0) {
+    buttonHTML = `
+      <button
+        type="button"
+        id="event-register-btn"
+        class="btn event-detail__button"
+      >
+        Inscribirme
+      </button>
+    `;
+  } else if (estado === "PUBLICADO" && disponibilidad <= 0) {
+    buttonHTML = `
+      <button
+        type="button"
+        id="event-register-btn"
+        class="btn event-detail__button"
+      >
+        Unirme a lista de espera
+      </button>
+    `;
+  } else {
+    buttonHTML = `
+      <button
+        type="button"
+        class="btn event-detail__button"
+        disabled
+      >
+        Evento no disponible
+      </button>
+    `;
+  }
 
   container.innerHTML = `
     <div class="event-detail__content">
@@ -160,31 +205,7 @@ function renderEvent(container, event) {
 
       </div>
 
-      ${
-        event.estado === "PUBLICADO" && disponibilidad > 0
-          ? `
-            <button
-              type="button"
-              id="event-register-btn"
-              class="btn event-detail__button"
-            >
-              Inscribirme
-            </button>
-          `
-          : `
-            <button
-              type="button"
-              class="btn event-detail__button"
-              disabled
-            >
-              ${
-                event.estado === "CANCELADO"
-                  ? "Evento cancelado"
-                  : "Aforo completo"
-              }
-            </button>
-          `
-      }
+      ${buttonHTML}
 
       <p class="event-detail__status">
         Estado: ${event.estado}
@@ -197,6 +218,7 @@ function renderEvent(container, event) {
 
   if (registerButton) {
     registerButton.addEventListener("click", async () => {
+
       const sessionToken = localStorage.getItem(
         "eventpass_session_token"
       );
@@ -211,7 +233,6 @@ function renderEvent(container, event) {
         });
 
         document.body.appendChild(modal);
-
         return;
       }
 
@@ -233,27 +254,29 @@ function renderEvent(container, event) {
           );
         }
 
-        const estado =
+        const estadoRespuesta =
           String(response.estado || "").toUpperCase();
 
         let message =
           "Tu inscripción fue registrada correctamente.";
 
-        if (estado === "CONFIRMADA") {
+        let title = "Inscripción exitosa";
+        let buttonText = "Inscrito";
+
+        if (estadoRespuesta === "CONFIRMADA") {
           message =
             "¡Inscripción confirmada! Tu cupo ha sido reservado.";
         }
 
-        if (estado === "LISTA_ESPERA") {
+        if (estadoRespuesta === "LISTA_ESPERA") {
+          title = "Lista de espera";
           message =
             "El evento está lleno. Has sido agregado a la lista de espera.";
+          buttonText = "En lista de espera";
         }
 
         const modal = createModal({
-          title:
-            estado === "LISTA_ESPERA"
-              ? "Lista de espera"
-              : "Inscripción exitosa",
+          title,
           message,
           type: "EventPass",
           confirmText: "Entendido",
@@ -261,10 +284,8 @@ function renderEvent(container, event) {
 
         document.body.appendChild(modal);
 
-        registerButton.textContent =
-          estado === "LISTA_ESPERA"
-            ? "En lista de espera"
-            : "Inscrito";
+        registerButton.textContent = buttonText;
+
       } catch (error) {
         console.error(
           "Error realizando inscripción:",
@@ -294,7 +315,11 @@ function renderEvent(container, event) {
         document.body.appendChild(modal);
 
         registerButton.disabled = false;
-        registerButton.textContent = "Inscribirme";
+
+        registerButton.textContent =
+          disponibilidad > 0
+            ? "Inscribirme"
+            : "Unirme a lista de espera";
       }
     });
   }

@@ -2,14 +2,18 @@ import {
   getUserProfile,
   updateUser,
   requestTelegramLink,
+  getTelegramStatus,
   getRegistrations,
   cancelRegistration
-} from '../services/api.js';
+} from "../services/api.js";
+
 
 export function createPerfilPage() {
-  const page = document.createElement('div');
 
-  page.className = 'profile-page';
+  const page = document.createElement("div");
+
+  page.className = "profile-page";
+
 
   page.innerHTML = `
     <main class="profile">
@@ -146,6 +150,7 @@ export function createPerfilPage() {
           </section>
 
 
+
           <!-- =========================
                TELEGRAM
                ========================= -->
@@ -171,8 +176,11 @@ export function createPerfilPage() {
                 Estado de vinculación
               </span>
 
-              <strong class="telegram-status__value">
-                No vinculado
+              <strong
+                class="telegram-status__value"
+                id="telegram-status-value"
+              >
+                Comprobando...
               </strong>
 
               <p class="telegram-status__description">
@@ -199,6 +207,7 @@ export function createPerfilPage() {
             ></div>
 
           </section>
+
 
 
           <!-- =========================
@@ -244,47 +253,50 @@ export function createPerfilPage() {
   `;
 
 
-  // =========================
-  // ELEMENTOS DEL PERFIL
-  // =========================
+  // =========================================================
+  // ELEMENTOS
+  // =========================================================
 
   const profileForm =
-    page.querySelector('#profile-form');
+    page.querySelector("#profile-form");
 
   const profileMessage =
-    page.querySelector('#profile-message');
+    page.querySelector("#profile-message");
 
   const telegramButton =
-    page.querySelector('#telegram-link-btn');
+    page.querySelector("#telegram-link-btn");
 
   const telegramMessage =
-    page.querySelector('#telegram-message');
+    page.querySelector("#telegram-message");
 
 
-  // =========================
+  // =========================================================
   // ACTUALIZAR PERFIL
-  // =========================
+  // =========================================================
 
   profileForm.addEventListener(
-    'submit',
+    "submit",
     async (event) => {
 
       event.preventDefault();
 
+
       const usuarioId =
         localStorage.getItem(
-          'eventpass_usuario_id'
+          "eventpass_usuario_id"
         );
+
 
       const nombre =
         page
-          .querySelector('#profile-nombre')
+          .querySelector("#profile-nombre")
           .value
           .trim();
 
+
       const email =
         page
-          .querySelector('#profile-email')
+          .querySelector("#profile-email")
           .value
           .trim();
 
@@ -292,10 +304,10 @@ export function createPerfilPage() {
       if (!usuarioId) {
 
         profileMessage.textContent =
-          'No hay una sesión de usuario válida.';
+          "No hay una sesión de usuario válida.";
 
         profileMessage.className =
-          'form-message form-message--error';
+          "form-message form-message--error";
 
         return;
       }
@@ -304,10 +316,10 @@ export function createPerfilPage() {
       if (!nombre || !email) {
 
         profileMessage.textContent =
-          'Nombre y correo son obligatorios.';
+          "Nombre y correo son obligatorios.";
 
         profileMessage.className =
-          'form-message form-message--error';
+          "form-message form-message--error";
 
         return;
       }
@@ -324,13 +336,14 @@ export function createPerfilPage() {
         submitButton.disabled = true;
 
         submitButton.textContent =
-          'Guardando...';
+          "Guardando...";
+
 
         profileMessage.textContent =
-          'Guardando cambios...';
+          "Guardando cambios...";
 
         profileMessage.className =
-          'form-message';
+          "form-message";
 
 
         const response =
@@ -345,33 +358,33 @@ export function createPerfilPage() {
 
           throw new Error(
             response.mensaje ||
-            'No fue posible actualizar el perfil.'
+            "No fue posible actualizar el perfil."
           );
 
         }
 
 
         profileMessage.textContent =
-          'Perfil actualizado correctamente.';
+          "Perfil actualizado correctamente.";
 
         profileMessage.className =
-          'form-message form-message--success';
+          "form-message form-message--success";
 
 
       } catch (error) {
 
         console.error(
-          'Error actualizando perfil:',
+          "Error actualizando perfil:",
           error
         );
 
 
         profileMessage.textContent =
           error.message ||
-          'No fue posible actualizar el perfil.';
+          "No fue posible actualizar el perfil.";
 
         profileMessage.className =
-          'form-message form-message--error';
+          "form-message form-message--error";
 
 
       } finally {
@@ -379,7 +392,7 @@ export function createPerfilPage() {
         submitButton.disabled = false;
 
         submitButton.textContent =
-          'Guardar cambios';
+          "Guardar cambios";
 
       }
 
@@ -387,32 +400,34 @@ export function createPerfilPage() {
   );
 
 
-  // =========================
+
+  // =========================================================
   // VINCULAR TELEGRAM
-  // =========================
+  // =========================================================
 
   telegramButton.addEventListener(
-    'click',
+    "click",
     async () => {
 
       const usuarioId =
         localStorage.getItem(
-          'eventpass_usuario_id'
+          "eventpass_usuario_id"
         );
+
 
       const sessionToken =
         localStorage.getItem(
-          'eventpass_session_token'
+          "eventpass_session_token"
         );
 
 
       if (!usuarioId || !sessionToken) {
 
         telegramMessage.textContent =
-          'Tu sesión no es válida. Inicia sesión nuevamente.';
+          "Tu sesión no es válida. Inicia sesión nuevamente.";
 
         telegramMessage.className =
-          'form-message form-message--error';
+          "form-message form-message--error";
 
         return;
       }
@@ -423,14 +438,51 @@ export function createPerfilPage() {
         telegramButton.disabled = true;
 
         telegramButton.textContent =
-          'Generando código...';
+          "Comprobando...";
 
 
         telegramMessage.textContent =
-          'Generando código de vinculación...';
+          "Comprobando estado de Telegram...";
 
         telegramMessage.className =
-          'form-message';
+          "form-message";
+
+
+        // -------------------------------------------------
+        // PRIMERO COMPROBAMOS SI YA ESTÁ VINCULADO
+        // -------------------------------------------------
+
+        const currentStatus =
+          await getTelegramStatus({
+            usuarioId,
+            sessionToken
+          });
+
+
+        if (
+          currentStatus?.ok &&
+          currentStatus?.vinculado
+        ) {
+
+          setTelegramLinkedState(page);
+
+          return;
+        }
+
+
+        // -------------------------------------------------
+        // SI NO ESTÁ VINCULADO, GENERAMOS CÓDIGO
+        // -------------------------------------------------
+
+        telegramButton.textContent =
+          "Generando código...";
+
+
+        telegramMessage.textContent =
+          "Generando código de vinculación...";
+
+        telegramMessage.className =
+          "form-message";
 
 
         const response =
@@ -444,19 +496,25 @@ export function createPerfilPage() {
 
           throw new Error(
             response?.mensaje ||
-            'No fue posible generar el código de vinculación.'
+            "No fue posible generar el código de vinculación."
           );
 
         }
 
 
+        // -------------------------------------------------
+        // MOSTRAR CÓDIGO
+        // -------------------------------------------------
+
         telegramMessage.innerHTML = `
           <strong>
             Código: ${response.codigo}
           </strong>
+
           <br><br>
 
           Abre Telegram y envía al bot:
+
           <br>
 
           <strong>
@@ -465,38 +523,46 @@ export function createPerfilPage() {
 
           <br><br>
 
-          El código tiene una vigencia de 10 minutos.
+          El código tiene una vigencia de
+          <strong>10 minutos</strong>.
         `;
 
 
         telegramMessage.className =
-          'form-message form-message--success';
+          "form-message form-message--success";
 
 
         telegramButton.textContent =
-          'Código generado';
+          "Esperando vinculación...";
+
+
+        // -------------------------------------------------
+        // COMENZAR A COMPROBAR
+        // -------------------------------------------------
+
+        waitForTelegramLink(page);
 
 
       } catch (error) {
 
         console.error(
-          'Error generando código de Telegram:',
+          "Error generando código de Telegram:",
           error
         );
 
 
         telegramMessage.textContent =
           error.message ||
-          'No fue posible generar el código de vinculación.';
+          "No fue posible generar el código de vinculación.";
 
         telegramMessage.className =
-          'form-message form-message--error';
+          "form-message form-message--error";
 
 
         telegramButton.disabled = false;
 
         telegramButton.textContent =
-          'Vincular Telegram';
+          "Vincular Telegram";
 
       }
 
@@ -504,11 +570,15 @@ export function createPerfilPage() {
   );
 
 
-  // =========================
-  // CARGAR PERFIL
-  // =========================
+
+  // =========================================================
+  // CARGAR DATOS INICIALES
+  // =========================================================
 
   loadUserProfile(page);
+
+  loadTelegramStatus(page);
+
   loadUserRegistrations(page);
 
 
@@ -516,15 +586,16 @@ export function createPerfilPage() {
 }
 
 
-// =========================
+
+// =========================================================
 // CONSULTAR PERFIL
-// =========================
+// =========================================================
 
 async function loadUserProfile(page) {
 
   const usuarioId =
     localStorage.getItem(
-      'eventpass_usuario_id'
+      "eventpass_usuario_id"
     );
 
 
@@ -546,7 +617,7 @@ async function loadUserProfile(page) {
 
       throw new Error(
         response?.mensaje ||
-        'No fue posible consultar el perfil.'
+        "No fue posible consultar el perfil."
       );
 
     }
@@ -558,120 +629,143 @@ async function loadUserProfile(page) {
 
     const nameInput =
       page.querySelector(
-        '#profile-nombre'
+        "#profile-nombre"
       );
 
 
     const emailInput =
       page.querySelector(
-        '#profile-email'
+        "#profile-email"
       );
 
 
     const stateInput =
       page.querySelector(
-        '#profile-estado'
+        "#profile-estado"
       );
 
 
     nameInput.value =
-      user.nombre || '';
+      user.nombre || "";
 
 
     emailInput.value =
-      user.email_normalizado || '';
+      user.email_normalizado || "";
 
 
     stateInput.value =
-      user.estado || '';
+      user.estado || "";
 
 
   } catch (error) {
 
     console.error(
-      'Error cargando perfil:',
+      "Error cargando perfil:",
       error
     );
 
 
     const message =
       page.querySelector(
-        '#profile-message'
+        "#profile-message"
       );
 
 
     message.textContent =
       error.message ||
-      'No fue posible cargar tu perfil.';
+      "No fue posible cargar tu perfil.";
 
 
     message.className =
-      'form-message form-message--error';
+      "form-message form-message--error";
 
   }
 
 }
 
-// =========================
+
+
+// =========================================================
 // CARGAR INSCRIPCIONES
-// =========================
+// =========================================================
 
 async function loadUserRegistrations(page) {
-  const sessionToken = localStorage.getItem(
-    'eventpass_session_token'
-  );
 
-  const status = page.querySelector(
-    '#registrations-status'
-  );
+  const sessionToken =
+    localStorage.getItem(
+      "eventpass_session_token"
+    );
 
-  const list = page.querySelector(
-    '#registrations-list'
-  );
+
+  const status =
+    page.querySelector(
+      "#registrations-status"
+    );
+
+
+  const list =
+    page.querySelector(
+      "#registrations-list"
+    );
+
 
   if (!sessionToken) {
+
     status.textContent =
-      'No hay una sesión válida.';
+      "No hay una sesión válida.";
 
     status.className =
-      'form-message form-message--error';
+      "form-message form-message--error";
 
     return;
   }
 
+
   try {
+
     status.textContent =
-      'Cargando tus inscripciones...';
+      "Cargando tus inscripciones...";
 
     status.className =
-      'form-message';
+      "form-message";
 
-    list.innerHTML = '';
+
+    list.innerHTML = "";
+
 
     const response =
       await getRegistrations(sessionToken);
 
+
     if (response?.ok === false) {
+
       throw new Error(
         response.mensaje ||
-        'No fue posible consultar tus inscripciones.'
+        "No fue posible consultar tus inscripciones."
       );
+
     }
+
 
     const inscripciones =
       Array.isArray(response?.inscripciones)
         ? response.inscripciones
         : [];
 
+
     if (inscripciones.length === 0) {
+
       status.textContent =
-        'Todavía no tienes inscripciones.';
+        "Todavía no tienes inscripciones.";
 
       status.className =
-        'form-message';
+        "form-message";
+
 
       list.innerHTML = `
+
         <div class="registration-empty">
+
           <span class="registration-empty__number">
             00
           </span>
@@ -691,180 +785,232 @@ async function loadUserRegistrations(page) {
           >
             Explorar eventos
           </a>
+
         </div>
+
       `;
 
       return;
     }
 
+
     status.textContent =
       `${inscripciones.length} inscripción${
-        inscripciones.length === 1 ? '' : 'es'
+        inscripciones.length === 1
+          ? ""
+          : "es"
       }`;
 
+
     status.className =
-      'form-message form-message--success';
+      "form-message form-message--success";
 
-    inscripciones.forEach((inscripcion) => {
-      const item =
-        document.createElement('article');
 
-      item.className =
-        'registration-item';
+    inscripciones.forEach(
+      (inscripcion) => {
 
-      const estado =
-        inscripcion.estado || '';
+        const item =
+          document.createElement("article");
 
-      let estadoClass =
-        'registration-item__status';
 
-      if (estado === 'CONFIRMADA') {
-        estadoClass +=
-          ' registration-item__status--confirmed';
+        item.className =
+          "registration-item";
+
+
+        const estado =
+          inscripcion.estado || "";
+
+
+        let estadoClass =
+          "registration-item__status";
+
+
+        if (estado === "CONFIRMADA") {
+
+          estadoClass +=
+            " registration-item__status--confirmed";
+
+        }
+
+
+        if (estado === "LISTA_ESPERA") {
+
+          estadoClass +=
+            " registration-item__status--waiting";
+
+        }
+
+
+        if (estado === "CANCELADA") {
+
+          estadoClass +=
+            " registration-item__status--cancelled";
+
+        }
+
+
+        item.innerHTML = `
+
+          <div class="registration-item__info">
+
+            <span class="registration-item__label">
+              Evento
+            </span>
+
+            <h3 class="registration-item__title">
+              ${inscripcion.evento_id || "Evento EventPass"}
+            </h3>
+
+
+            ${
+              inscripcion.nombre_acreditacion
+                ? `
+                  <p>
+                    A nombre de:
+                    <strong>
+                      ${inscripcion.nombre_acreditacion}
+                    </strong>
+                  </p>
+                `
+                : ""
+            }
+
+
+            ${
+              inscripcion.fecha_inscripcion
+                ? `
+                  <p>
+                    Inscripción:
+                    ${inscripcion.fecha_inscripcion}
+                  </p>
+                `
+                : ""
+            }
+
+          </div>
+
+
+          <div class="registration-item__actions">
+
+            <span class="${estadoClass}">
+              ${estado || "SIN ESTADO"}
+            </span>
+
+
+            ${
+              estado !== "CANCELADA"
+                ? `
+                  <button
+                    type="button"
+                    class="btn btn-outline registration-cancel-button"
+                    data-evento-id="${inscripcion.evento_id}"
+                  >
+                    Cancelar inscripción
+                  </button>
+                `
+                : ""
+            }
+
+          </div>
+
+        `;
+
+
+        const cancelButton =
+          item.querySelector(
+            ".registration-cancel-button"
+          );
+
+
+        if (cancelButton) {
+
+          cancelButton.addEventListener(
+            "click",
+            async () => {
+
+              await cancelUserRegistration(
+                page,
+                inscripcion.evento_id
+              );
+
+            }
+          );
+
+        }
+
+
+        list.appendChild(item);
+
       }
+    );
 
-      if (estado === 'LISTA_ESPERA') {
-        estadoClass +=
-          ' registration-item__status--waiting';
-      }
-
-      if (estado === 'CANCELADA') {
-        estadoClass +=
-          ' registration-item__status--cancelled';
-      }
-
-      item.innerHTML = `
-        <div class="registration-item__info">
-
-          <span class="registration-item__label">
-            Evento
-          </span>
-
-          <h3 class="registration-item__title">
-            ${inscripcion.evento_id || 'Evento EventPass'}
-          </h3>
-
-          ${
-            inscripcion.nombre_acreditacion
-              ? `
-                <p>
-                  A nombre de:
-                  <strong>
-                    ${inscripcion.nombre_acreditacion}
-                  </strong>
-                </p>
-              `
-              : ''
-          }
-
-          ${
-            inscripcion.fecha_inscripcion
-              ? `
-                <p>
-                  Inscripción:
-                  ${inscripcion.fecha_inscripcion}
-                </p>
-              `
-              : ''
-          }
-
-        </div>
-
-        <div class="registration-item__actions">
-
-          <span class="${estadoClass}">
-            ${estado || 'SIN ESTADO'}
-          </span>
-
-          ${
-            estado !== 'CANCELADA'
-              ? `
-                <button
-                  type="button"
-                  class="btn btn-outline registration-cancel-button"
-                  data-evento-id="${inscripcion.evento_id}"
-                >
-                  Cancelar inscripción
-                </button>
-              `
-              : ''
-          }
-
-        </div>
-      `;
-
-      const cancelButton =
-        item.querySelector(
-          '.registration-cancel-button'
-        );
-
-      if (cancelButton) {
-        cancelButton.addEventListener(
-          'click',
-          async () => {
-            await cancelUserRegistration(
-              page,
-              inscripcion.evento_id
-            );
-          }
-        );
-      }
-
-      list.appendChild(item);
-    });
 
   } catch (error) {
+
     console.error(
-      'Error cargando inscripciones:',
+      "Error cargando inscripciones:",
       error
     );
 
+
     status.textContent =
       error.message ||
-      'No fue posible cargar tus inscripciones.';
+      "No fue posible cargar tus inscripciones.";
+
 
     status.className =
-      'form-message form-message--error';
+      "form-message form-message--error";
 
-    list.innerHTML = '';
+
+    list.innerHTML = "";
+
   }
+
 }
 
 
-// =========================
+
+// =========================================================
 // CANCELAR INSCRIPCIÓN
-// =========================
+// =========================================================
 
 async function cancelUserRegistration(
   page,
   eventoId
 ) {
+
   const sessionToken =
     localStorage.getItem(
-      'eventpass_session_token'
+      "eventpass_session_token"
     );
+
 
   const status =
     page.querySelector(
-      '#registrations-status'
+      "#registrations-status"
     );
 
+
   if (!sessionToken || !eventoId) {
+
     status.textContent =
-      'No fue posible cancelar la inscripción.';
+      "No fue posible cancelar la inscripción.";
 
     status.className =
-      'form-message form-message--error';
+      "form-message form-message--error";
 
     return;
   }
 
+
   try {
+
     status.textContent =
-      'Cancelando inscripción...';
+      "Cancelando inscripción...";
 
     status.className =
-      'form-message';
+      "form-message";
+
 
     const response =
       await cancelRegistration({
@@ -872,32 +1018,360 @@ async function cancelUserRegistration(
         eventoId
       });
 
+
     if (response?.ok === false) {
+
       throw new Error(
         response.mensaje ||
-        'No fue posible cancelar la inscripción.'
+        "No fue posible cancelar la inscripción."
       );
+
     }
 
+
     status.textContent =
-      'Inscripción cancelada correctamente.';
+      "Inscripción cancelada correctamente.";
 
     status.className =
-      'form-message form-message--success';
+      "form-message form-message--success";
+
 
     await loadUserRegistrations(page);
 
+
   } catch (error) {
+
     console.error(
-      'Error cancelando inscripción:',
+      "Error cancelando inscripción:",
       error
     );
 
+
     status.textContent =
       error.message ||
-      'No fue posible cancelar la inscripción.';
+      "No fue posible cancelar la inscripción.";
+
 
     status.className =
-      'form-message form-message--error';
+      "form-message form-message--error";
+
   }
+
+}
+
+
+
+// =========================================================
+// CARGAR ESTADO DE TELEGRAM
+// =========================================================
+
+async function loadTelegramStatus(page) {
+
+  const usuarioId =
+    localStorage.getItem(
+      "eventpass_usuario_id"
+    );
+
+
+  const sessionToken =
+    localStorage.getItem(
+      "eventpass_session_token"
+    );
+
+
+  const statusElement =
+    page.querySelector(
+      "#telegram-status-value"
+    );
+
+
+  if (!statusElement) {
+    return;
+  }
+
+
+  if (!usuarioId || !sessionToken) {
+
+    statusElement.textContent =
+      "No disponible";
+
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await getTelegramStatus({
+        usuarioId,
+        sessionToken
+      });
+
+
+    if (!response?.ok) {
+
+      throw new Error(
+        response?.mensaje ||
+        "No fue posible consultar Telegram."
+      );
+
+    }
+
+
+    if (response.vinculado) {
+
+      setTelegramLinkedState(page);
+
+    } else {
+
+      statusElement.textContent =
+        "No vinculado";
+
+
+      const telegramButton =
+        page.querySelector(
+          "#telegram-link-btn"
+        );
+
+
+      if (telegramButton) {
+
+        telegramButton.disabled = false;
+
+        telegramButton.textContent =
+          "Vincular Telegram";
+
+      }
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      "Error consultando estado de Telegram:",
+      error
+    );
+
+
+    statusElement.textContent =
+      "No disponible";
+
+  }
+
+}
+
+
+
+// =========================================================
+// ESTADO TELEGRAM VINCULADO
+// =========================================================
+
+function setTelegramLinkedState(page) {
+
+  const statusElement =
+    page.querySelector(
+      "#telegram-status-value"
+    );
+
+
+  const telegramButton =
+    page.querySelector(
+      "#telegram-link-btn"
+    );
+
+
+  const telegramMessage =
+    page.querySelector(
+      "#telegram-message"
+    );
+
+
+  if (statusElement) {
+
+    statusElement.textContent =
+      "Vinculado";
+
+  }
+
+
+  if (telegramButton) {
+
+    telegramButton.disabled =
+      true;
+
+    telegramButton.textContent =
+      "Telegram vinculado";
+
+  }
+
+
+  if (telegramMessage) {
+
+    telegramMessage.innerHTML = "";
+
+    telegramMessage.className =
+      "form-message hidden";
+
+  }
+
+}
+
+
+
+// =========================================================
+// ESPERAR VINCULACIÓN TELEGRAM
+// =========================================================
+
+async function waitForTelegramLink(page) {
+
+  const statusElement =
+    page.querySelector(
+      "#telegram-status-value"
+    );
+
+
+  const telegramMessage =
+    page.querySelector(
+      "#telegram-message"
+    );
+
+
+  if (!statusElement) {
+    return;
+  }
+
+
+  const usuarioId =
+    localStorage.getItem(
+      "eventpass_usuario_id"
+    );
+
+
+  const sessionToken =
+    localStorage.getItem(
+      "eventpass_session_token"
+    );
+
+
+  if (!usuarioId || !sessionToken) {
+    return;
+  }
+
+
+  // -------------------------------------------------
+  // 10 minutos
+  // 3 segundos entre comprobaciones
+  // -------------------------------------------------
+
+  const maxAttempts = 200;
+
+  let attempts = 0;
+
+
+  const checkStatus =
+    async () => {
+
+      attempts++;
+
+
+      try {
+
+        const response =
+          await getTelegramStatus({
+            usuarioId,
+            sessionToken
+          });
+
+
+        if (
+          response?.ok &&
+          response?.vinculado
+        ) {
+
+          // -------------------------------------------
+          // YA SE VINCULÓ CORRECTAMENTE
+          // -------------------------------------------
+
+          setTelegramLinkedState(page);
+
+          return;
+
+        }
+
+
+        // -------------------------------------------
+        // TODAVÍA NO ESTÁ VINCULADO
+        // -------------------------------------------
+
+        if (
+          attempts < maxAttempts
+        ) {
+
+          setTimeout(
+            checkStatus,
+            3000
+          );
+
+        } else {
+
+          telegramMessage.textContent =
+            "El código ha expirado. Genera uno nuevo.";
+
+          telegramMessage.className =
+            "form-message form-message--error";
+
+
+          const telegramButton =
+            page.querySelector(
+              "#telegram-link-btn"
+            );
+
+
+          if (telegramButton) {
+
+            telegramButton.disabled =
+              false;
+
+            telegramButton.textContent =
+              "Vincular Telegram";
+
+          }
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "Error comprobando vinculación de Telegram:",
+          error
+        );
+
+
+        if (
+          attempts < maxAttempts
+        ) {
+
+          setTimeout(
+            checkStatus,
+            3000
+          );
+
+        }
+
+      }
+
+    };
+
+
+  // -------------------------------------------------
+  // PRIMERA COMPROBACIÓN DESPUÉS DE 3 SEGUNDOS
+  // -------------------------------------------------
+
+  setTimeout(
+    checkStatus,
+    3000
+  );
+
 }
