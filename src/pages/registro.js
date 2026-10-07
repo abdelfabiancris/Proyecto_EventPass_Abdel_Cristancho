@@ -204,11 +204,15 @@ export function createRegistroPage() {
 
       message.className = "form-message";
 
+      console.log("REGISTRO → antes de createUser");
+
       const usuario = await createUser({
         nombre: `${nombre} ${apellido}`,
         email,
         password,
       });
+
+      console.log("REGISTRO → respuesta de createUser:", usuario);
 
       if (usuario?.ok === false) {
         throw new Error(usuario.mensaje || "No fue posible crear la cuenta.");
@@ -225,7 +229,9 @@ export function createRegistroPage() {
         window.location.hash = "#login";
       }, 1500);
     } catch (error) {
-      console.error("Error registrando usuario:", error);
+      console.error("REGISTRO → ERROR COMPLETO:", error);
+      console.error("REGISTRO → ERROR MESSAGE:", error?.message);
+      console.error("REGISTRO → ERROR STACK:", error?.stack);
 
       message.textContent = error.message || "No fue posible crear la cuenta.";
 
