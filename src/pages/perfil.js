@@ -105,7 +105,7 @@ export function createPerfilPage() {
                   name="email"
                   class="form-input"
                   value="usuario@eventpass.com"
-                  disabled
+                  required
                 >
 
               </div>
