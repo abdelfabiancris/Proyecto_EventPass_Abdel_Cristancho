@@ -180,7 +180,7 @@ export function createPerfilPage() {
                 class="telegram-status__value"
                 id="telegram-status-value"
               >
-                Comprobando...
+                Pulsa para comprobar
               </strong>
 
               <p class="telegram-status__description">
@@ -576,9 +576,6 @@ export function createPerfilPage() {
   // =========================================================
 
   loadUserProfile(page);
-
-  loadTelegramStatus(page);
-
   loadUserRegistrations(page);
 
 
