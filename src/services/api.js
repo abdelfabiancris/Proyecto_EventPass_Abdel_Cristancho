@@ -5,14 +5,14 @@ const N8N_WF03_URL = import.meta.env.VITE_N8N_WF03_URL;
 const N8N_WF06_URL = import.meta.env.VITE_N8N_WF06_URL;
 const N8N_WF11_URL = import.meta.env.VITE_N8N_WF11_URL;
 
-
-
 /**
  * Realiza una petición HTTP a n8n.
  */
 async function request(url, options = {}) {
   if (!url) {
-    throw new Error("No se ha configurado la URL del workflow de n8n.");
+    throw new Error(
+      "No se ha configurado la URL del workflow de n8n."
+    );
   }
 
   const response = await fetch(url, {
@@ -29,13 +29,15 @@ async function request(url, options = {}) {
     data = await response.json();
   } catch {
     throw new Error(
-      `n8n respondió con un formato no válido. HTTP ${response.status}`,
+      `n8n respondió con un formato no válido. HTTP ${response.status}`
     );
   }
 
   if (!response.ok) {
     throw new Error(
-      data?.message || data?.error || `Error HTTP ${response.status}`,
+      data?.message ||
+      data?.error ||
+      `Error HTTP ${response.status}`
     );
   }
 
@@ -80,7 +82,10 @@ export async function getEvents(visitorId = "") {
 /**
  * Obtiene eventos por categoría.
  */
-export async function getEventsByCategory(categoria, visitorId = "") {
+export async function getEventsByCategory(
+  categoria,
+  visitorId = ""
+) {
   return getCatalog({
     tipo: "FILTRO",
     categoria,
@@ -91,7 +96,10 @@ export async function getEventsByCategory(categoria, visitorId = "") {
 /**
  * Obtiene el detalle de un evento.
  */
-export async function getEventById(eventoId, visitorId = "") {
+export async function getEventById(
+  eventoId,
+  visitorId = ""
+) {
   return getCatalog({
     tipo: "DETALLE",
     eventoId,
@@ -102,7 +110,11 @@ export async function getEventById(eventoId, visitorId = "") {
 /**
  * Operaciones de usuarios mediante WF01.
  */
-export async function createUser({ nombre, email, password }) {
+export async function createUser({
+  nombre,
+  email,
+  password,
+}) {
   return request(N8N_WF01_URL, {
     method: "POST",
     body: JSON.stringify({
@@ -117,7 +129,10 @@ export async function createUser({ nombre, email, password }) {
 /**
  * Inicio de sesión mediante WF02.
  */
-export async function loginUser({ email, password }) {
+export async function loginUser({
+  email,
+  password,
+}) {
   return request(N8N_WF02_URL, {
     method: "POST",
     body: JSON.stringify({
@@ -159,11 +174,11 @@ export async function validateSession(sessionToken) {
  */
 export async function getUserProfile(usuarioId) {
   return request(N8N_WF01_URL, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({
-      operacion: 'READ',
-      usuario_id: usuarioId
-    })
+      operacion: "READ",
+      usuario_id: usuarioId,
+    }),
   });
 }
 
@@ -173,16 +188,16 @@ export async function getUserProfile(usuarioId) {
 export async function updateUser({
   usuarioId,
   nombre,
-  email
+  email,
 }) {
   return request(N8N_WF01_URL, {
-    method: 'POST',
+    method: "POST",
     body: JSON.stringify({
-      operacion: 'UPDATE',
+      operacion: "UPDATE",
       usuario_id: usuarioId,
       nombre,
-      email
-    })
+      email,
+    }),
   });
 }
 
@@ -191,39 +206,42 @@ export async function updateUser({
  */
 export async function requestTelegramLink({
   usuarioId,
-  sessionToken
-}) {
-  return request(N8N_WF03_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      usuario_id: usuarioId,
-      session_token: sessionToken
-    })
-  });
-}
-
-export async function getTelegramStatus({
-  usuarioId,
-  sessionToken
+  sessionToken,
 }) {
   return request(N8N_WF03_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
     body: JSON.stringify({
-      operation: "ESTADO",
       usuario_id: usuarioId,
-      session_token: sessionToken
-    })
+      session_token: sessionToken,
+    }),
   });
 }
 
+/**
+ * Consulta el estado de vinculación de Telegram.
+ */
+export async function getTelegramStatus({
+  usuarioId,
+  sessionToken,
+}) {
+  return request(N8N_WF03_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      operation: "ESTADO",
+      usuario_id: usuarioId,
+      session_token: sessionToken,
+    }),
+  });
+}
+
+/**
+ * Crea una inscripción mediante WF06.
+ */
 export async function createRegistration({
   sessionToken,
   eventoId,
   nombreAcreditacion,
-  observaciones = ""
+  observaciones = "",
 }) {
   return request(N8N_WF06_URL, {
     method: "POST",
@@ -233,11 +251,14 @@ export async function createRegistration({
       evento_id: eventoId,
       nombre_acreditacion: nombreAcreditacion,
       observaciones,
-      origen: "WEB"
-    })
+      origen: "WEB",
+    }),
   });
 }
 
+/**
+ * Consulta las inscripciones mediante WF06.
+ */
 export async function getRegistrations(sessionToken) {
   return request(N8N_WF06_URL, {
     method: "POST",
@@ -248,6 +269,9 @@ export async function getRegistrations(sessionToken) {
   });
 }
 
+/**
+ * Cancela una inscripción mediante WF06.
+ */
 export async function cancelRegistration({
   sessionToken,
   eventoId,
@@ -262,15 +286,68 @@ export async function cancelRegistration({
   });
 }
 
+/**
+ * Ejecuta el check-in mediante WF11.
+ *
+ * A diferencia de request(), esta función devuelve el cuerpo
+ * de la respuesta aunque n8n responda con HTTP 409.
+ *
+ * Así, la interfaz puede interpretar el resultado DUPLICADO.
+ * Los errores de red y las respuestas que no sean JSON válido
+ * siguen generando un error.
+ */
 export async function checkInRegistration({
   inscripcionId,
   eventoId,
 }) {
-  return request(N8N_WF11_URL, {
+  if (!N8N_WF11_URL) {
+    throw new Error(
+      "No se ha configurado la URL del workflow WF11."
+    );
+  }
+
+  const response = await fetch(N8N_WF11_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       inscripcion_id: inscripcionId,
       evento_id: eventoId,
     }),
   });
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error(
+      `WF11 respondió con un formato no válido. HTTP ${response.status}`
+    );
+  }
+
+  // Un 409 puede representar un intento duplicado.
+  // Devolvemos el cuerpo para que perfil.js interprete
+  // response.resultado y muestre el mensaje correspondiente.
+  if (response.status === 409) {
+    return {
+      ...data,
+      httpStatus: response.status,
+    };
+  }
+
+  // Los demás errores HTTP se manejan de forma explícita.
+  if (!response.ok) {
+    return {
+      ...data,
+      httpStatus: response.status,
+      ok: false,
+    };
+  }
+
+  return {
+    ...data,
+    httpStatus: response.status,
+  };
 }
