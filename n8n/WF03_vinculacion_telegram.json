@@ -7,7 +7,7 @@
         "path": "eventpass/telegram/vincular",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "http://localhost:5173"
+          "allowedOrigins": "https://proyecto-event-pass-abdel-cristanch.vercel.app"
         }
       },
       "id": "f359ed85-e91d-40f0-b2e8-cae044704354",
@@ -16,7 +16,7 @@
       "typeVersion": 2,
       "position": [
         0,
-        0
+        -16
       ],
       "webhookId": "950af76d-723e-445a-841c-db911ea4b80a"
     },
@@ -30,7 +30,7 @@
       "typeVersion": 1,
       "position": [
         224,
-        0
+        -16
       ]
     },
     {
@@ -57,7 +57,7 @@
       "typeVersion": 4,
       "position": [
         448,
-        0
+        -16
       ],
       "alwaysOutputData": true,
       "credentials": {
@@ -76,7 +76,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
       "position": [
-        912,
+        896,
         -112
       ]
     },
@@ -184,8 +184,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        1136,
-        0
+        1120,
+        -112
       ],
       "alwaysOutputData": false,
       "credentials": {
@@ -206,8 +206,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1600,
-        0
+        1568,
+        -112
       ]
     },
     {
@@ -223,7 +223,7 @@
       "typeVersion": 1,
       "position": [
         0,
-        512
+        304
       ],
       "webhookId": "a73fc9ed-3c52-4f4f-83cd-78e79f210016",
       "credentials": {
@@ -243,7 +243,7 @@
       "typeVersion": 1,
       "position": [
         224,
-        512
+        304
       ]
     },
     {
@@ -270,7 +270,7 @@
       "typeVersion": 4,
       "position": [
         448,
-        512
+        304
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -289,7 +289,7 @@
       "typeVersion": 1,
       "position": [
         672,
-        512
+        304
       ]
     },
     {
@@ -398,8 +398,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        912,
-        512
+        896,
+        304
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -504,8 +504,8 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        1152,
-        512
+        1120,
+        304
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -525,8 +525,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [
-        1392,
-        512
+        1344,
+        304
       ],
       "webhookId": "0a07595d-1bc7-4cef-a6cd-1112501f01bc",
       "credentials": {
@@ -543,8 +543,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1360,
-        0
+        1344,
+        -112
       ],
       "id": "aabe0cad-792e-4705-86e7-7c72cfc9a3e5",
       "name": "Preparar respuesta codigo Telegram"
@@ -610,7 +610,7 @@
       "typeVersion": 3.4,
       "position": [
         672,
-        0
+        -16
       ],
       "id": "aed12366-9dec-454b-a4d3-c6e8577a1e77",
       "name": "Ruta operación Telegram"
@@ -640,7 +640,7 @@
       "typeVersion": 4.7,
       "position": [
         896,
-        96
+        80
       ],
       "id": "6c4a08f7-aab2-4a01-ae4b-74af64407dc7",
       "name": "Consultar vinculaciones",
@@ -659,8 +659,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1168,
-        240
+        1120,
+        80
       ],
       "id": "f51a3792-872e-4ce7-bc2e-f2f471dd47d3",
       "name": "Preparar estado Telegram"
@@ -674,8 +674,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1408,
-        256
+        1344,
+        80
       ],
       "id": "abd318dd-d850-41b7-b701-304b8846dc06",
       "name": "Respuesta estado Telegram"
@@ -859,9 +859,13 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 20
   },
-  "versionId": "9c4c3b75-f5dd-434c-a98a-15f41c3e9161",
+  "versionId": "8e6c61bd-875c-488b-9588-d7d49fb75f82",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"

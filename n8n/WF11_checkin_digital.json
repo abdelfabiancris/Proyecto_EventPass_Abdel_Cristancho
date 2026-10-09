@@ -1,0 +1,721 @@
+{
+  "name": "WF11_checkin_digital",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "eventpass/checkin",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bee1294d-3f68-485a-a8d5-b485198fe7ae",
+      "name": "Webhook - Check-in digital",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1856,
+        304
+      ],
+      "webhookId": "eventpass-checkin"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$json.body??$json;\nconst inscripcion_id=String(b.inscripcion_id??'').trim(), evento_id=String(b.evento_id??'').trim();\nif(!inscripcion_id||!evento_id) return [{json:{ok:false,inscripcion_id,evento_id,resultado:'RECHAZADO',detalle:'FALTAN_DATOS: inscripcion_id y evento_id son obligatorios',status_http:400}}];\nreturn [{json:{ok:true,inscripcion_id,evento_id}}];"
+      },
+      "id": "c0d2a7e0-a196-4838-8009-ce167c90fb01",
+      "name": "Validar solicitud",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "inscripcion_id",
+              "lookupValue": "={{ $('Validar solicitud').first().json.inscripcion_id }}"
+            }
+          ]
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically"
+            }
+          }
+        }
+      },
+      "id": "f4117c9a-cea3-4f10-8446-eccb88733c7e",
+      "name": "Consultar inscripciones",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1408,
+        128
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8",
+          "mode": "list",
+          "cachedResultName": "EP04_Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Eventos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LcwHLIpQLoNCBTa2VZdgVF0oKzOT9rOmXxfTWzJfta8/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "evento_id",
+              "lookupValue": "={{ $('Validar solicitud').first().json.evento_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6fc56b95-1ebc-4dc9-945c-dd342037b7a4",
+      "name": "Consultar eventos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -1168,
+        128
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw",
+          "mode": "list",
+          "cachedResultName": "EP11_Checkin",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "checkins",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "18d4f086-6f64-45db-b3b7-347ace00b7d0",
+      "name": "Consultar historial check-in",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -928,
+        128
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst req = $('Validar solicitud').first().json;\nconst now = new Date().toISOString();\n\nlet resultado = 'RECHAZADO';\nlet detalle = '';\nlet ins = null;\nlet evento = null;\nlet usuario_id = '';\n\nif (req.ok === false) {\n  detalle = req.detalle || 'SOLICITUD_INVALIDA';\n} else {\n  const regs = $('Consultar inscripciones').all().map(x => x.json);\n  const events = $('Consultar eventos').all().map(x => x.json);\n  const hist = $('Consultar historial check-in').all().map(x => x.json);\n\n  ins = regs.find(\n    x => String(x.inscripcion_id ?? '') === req.inscripcion_id\n  );\n\n  evento = events.find(\n    x => String(x.evento_id ?? '') === req.evento_id\n  );\n\n  if (!ins) {\n    detalle = 'INSCRIPCION_NO_ENCONTRADA';\n  } else if (!evento) {\n    detalle = 'EVENTO_NO_ENCONTRADO';\n  } else if (String(ins.evento_id ?? '') !== req.evento_id) {\n    detalle = 'EVENTO_NO_CORRESPONDE_A_INSCRIPCION';\n  } else if (String(ins.estado ?? '').toUpperCase() === 'ASISTIO') {\n    resultado = 'DUPLICADO';\n    detalle = 'INGRESO_YA_REGISTRADO';\n  } else if (String(ins.estado ?? '').toUpperCase() !== 'CONFIRMADA') {\n    detalle = 'ESTADO_NO_PERMITE_INGRESO:' +\n      String(ins.estado ?? 'SIN_ESTADO');\n  } else if (\n    hist.some(\n      x =>\n        String(x.inscripcion_id ?? '') === req.inscripcion_id &&\n        String(x.resultado ?? '').toUpperCase() === 'EXITOSO'\n    )\n  ) {\n    resultado = 'DUPLICADO';\n    detalle = 'INGRESO_YA_REGISTRADO';\n  } else {\n    resultado = 'EXITOSO';\n    detalle = 'CHECKIN_REGISTRADO';\n  }\n\n  usuario_id = ins?.usuario_id || '';\n}\n\nconst checkin_id =\n  'CHK-' +\n  Math.random().toString(36).slice(2, 10).toUpperCase() +\n  Date.now().toString(36).slice(-4).toUpperCase();\n\nreturn [{\n  json: {\n    ok: resultado === 'EXITOSO',\n    checkin_id,\n    inscripcion_id: req.inscripcion_id || '',\n    evento_id: req.evento_id || '',\n    usuario_id,\n    fecha_checkin: now,\n    resultado,\n    detalle,\n    estado_inscripcion: ins?.estado || '',\n    evento_nombre: evento?.nombre || '',\n    status_http:\n      resultado === 'EXITOSO' ? 200 :\n      resultado === 'DUPLICADO' ? 409 :\n      detalle.startsWith('FALTAN_DATOS') ? 400 : 422\n  }\n}];\n"
+      },
+      "id": "0ab7764d-4893-44c2-a6a0-8c0224c65d7e",
+      "name": "Evaluar check-in",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -688,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw",
+          "mode": "list",
+          "cachedResultName": "EP11_Checkin",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "checkin",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZTmiHhRWqJbQ0tvy7fa9XU4_JT7LU8qO3WmNUtu67Bw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "checkin_id": "={{$json.checkin_id}}",
+            "inscripcion_id": "={{$json.inscripcion_id}}",
+            "evento_id": "={{$json.evento_id}}",
+            "usuario_id": "={{$json.usuario_id}}",
+            "fecha_checkin": "={{$json.fecha_checkin}}",
+            "resultado": "={{$json.resultado}}",
+            "detalle": "={{$json.detalle}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "checkin_id",
+              "displayName": "checkin_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_checkin",
+              "displayName": "fecha_checkin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resultado",
+              "displayName": "resultado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "detalle",
+              "displayName": "detalle",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6b05c268-9b8d-4a7d-9495-aee606206482",
+      "name": "Registrar intento check-in",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -448,
+        128
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d48e3c5e-808a-4737-9aa2-8a1b4129d957",
+              "leftValue": "={{ $('Evaluar check-in').first().json.resultado }}",
+              "rightValue": "EXITOSO",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bcb5b22a-9534-469b-9d7c-254de80d9661",
+      "name": "¿Check-in exitoso?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$('Evaluar check-in').first().json; return [{json:{...r,estado_nuevo:'ASISTIO',fecha_actualizacion:r.fecha_checkin}}];"
+      },
+      "id": "1b7a0b5b-4a65-4e1b-989d-e90df513aed5",
+      "name": "Preparar actualización inscripción",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI",
+          "mode": "list",
+          "cachedResultName": "EP06_Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inscripciones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I_P2RC26KOPDslt56jwRSZMj_vrtHrhxu4LjBupeTPI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "inscripcion_id": "={{$json.inscripcion_id}}",
+            "estado": "={{$json.estado_nuevo}}",
+            "fecha_actualizacion": "={{$json.fecha_actualizacion}}"
+          },
+          "matchingColumns": [
+            "inscripcion_id"
+          ],
+          "schema": [
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_actualizacion",
+              "displayName": "fecha_actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "2c12411c-4bb2-42a7-9d44-e396c628a658",
+      "name": "Actualizar inscripción a ASISTIO",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dy1m6ALY3u7IUWnf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r=$('Evaluar check-in').first().json; return [{json:{...r,tipo:'CHECKIN_EXITOSO',titulo:'Check-in realizado — EventPass',mensaje:'Tu ingreso al evento '+(r.evento_nombre||r.evento_id)+' fue registrado correctamente.',clave_idempotencia:'CHECKIN|'+r.inscripcion_id}}];"
+      },
+      "id": "98f53b94-de83-4e82-bcdf-f2532199fbd8",
+      "name": "Preparar notificación check-in",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "OoiPLhwkhAPhYjM9",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OoiPLhwkhAPhYjM9",
+          "cachedResultName": "WF09_notificaciones"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{$json.usuario_id}}",
+            "tipo": "={{$json.tipo}}",
+            "titulo": "={{$json.titulo}}",
+            "mensaje": "={{$json.mensaje}}",
+            "evento_id": "={{$json.evento_id}}",
+            "inscripcion_id": "={{$json.inscripcion_id}}",
+            "clave_idempotencia": "={{$json.clave_idempotencia}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "clave_idempotencia",
+              "displayName": "clave_idempotencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true,
+          "options": {}
+        },
+        "options": {}
+      },
+      "id": "81d566de-b2ba-46c9-9b67-79d77e066ec2",
+      "name": "Call WF09 - Notificaciones",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, resultado: 'EXITOSO', mensaje: 'Check-in realizado correctamente.', checkin_id: $('Evaluar check-in').first().json.checkin_id, inscripcion_id: $('Evaluar check-in').first().json.inscripcion_id, evento_id: $('Evaluar check-in').first().json.evento_id, fecha_checkin: $('Evaluar check-in').first().json.fecha_checkin } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "1a83f109-d61a-4efd-b0b6-cd43c77ba589",
+      "name": "Respuesta check-in",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: false, resultado: $('Evaluar check-in').first().json.resultado, mensaje: $('Evaluar check-in').first().json.resultado === 'DUPLICADO' ? 'El ingreso ya había sido registrado.' : 'No se pudo registrar el ingreso.', detalle: $('Evaluar check-in').first().json.detalle, checkin_id: $('Evaluar check-in').first().json.checkin_id, inscripcion_id: $('Evaluar check-in').first().json.inscripcion_id, evento_id: $('Evaluar check-in').first().json.evento_id } }}",
+        "options": {
+          "responseCode": "={{ $('Evaluar check-in').first().json.status_http }}"
+        }
+      },
+      "id": "130aae36-606c-4865-9ce4-0957160532d7",
+      "name": "Respuesta rechazo o duplicado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        352
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Check-in digital": {
+      "main": [
+        [
+          {
+            "node": "Validar solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar solicitud": {
+      "main": [
+        [
+          {
+            "node": "Consultar inscripciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar inscripciones": {
+      "main": [
+        [
+          {
+            "node": "Consultar eventos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar eventos": {
+      "main": [
+        [
+          {
+            "node": "Consultar historial check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar historial check-in": {
+      "main": [
+        [
+          {
+            "node": "Evaluar check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar check-in": {
+      "main": [
+        [
+          {
+            "node": "Registrar intento check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar intento check-in": {
+      "main": [
+        [
+          {
+            "node": "¿Check-in exitoso?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Check-in exitoso?": {
+      "main": [
+        [
+          {
+            "node": "Preparar actualización inscripción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta rechazo o duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar actualización inscripción": {
+      "main": [
+        [
+          {
+            "node": "Actualizar inscripción a ASISTIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar inscripción a ASISTIO": {
+      "main": [
+        [
+          {
+            "node": "Preparar notificación check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar notificación check-in": {
+      "main": [
+        [
+          {
+            "node": "Call WF09 - Notificaciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call WF09 - Notificaciones": {
+      "main": [
+        [
+          {
+            "node": "Respuesta check-in",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1d17569c-9dc1-47a4-8d77-dd4271ec5b82",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"
+  },
+  "nodeGroups": [],
+  "id": "OnEhce6svxuYMBDq",
+  "tags": []
+}

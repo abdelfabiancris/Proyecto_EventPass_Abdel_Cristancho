@@ -7,7 +7,7 @@
         "path": "eventpass/catalogo",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "http://localhost:5173"
+          "allowedOrigins": "https://proyecto-event-pass-abdel-cristanch.vercel.app"
         }
       },
       "id": "32cff760-8f37-4342-9c66-8f4f7d8a9984",
@@ -377,9 +377,13 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 20
   },
-  "versionId": "920b4475-3da9-4884-9c31-04e6f15c5548",
+  "versionId": "92f67ee7-908a-4a53-96ad-ff508469f38e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"

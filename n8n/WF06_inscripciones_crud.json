@@ -7,7 +7,7 @@
         "path": "eventpass/inscripciones",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "http://localhost:5173"
+          "allowedOrigins": "https://proyecto-event-pass-abdel-cristanch.vercel.app"
         }
       },
       "id": "541479dd-60da-42bd-84cc-fd0f2b68d5dc",
@@ -200,7 +200,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const req = $('Validar solicitud').first().json;\nconst rows = $input.all().map(item => item.json);\n\nif (req.ok === false) {\n  return [\n    {\n      json: {\n        ...req,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// SESIÓN VÁLIDA\n// =========================================================\n\nconst session = rows.find(\n  row =>\n    row.session_token !== undefined &&\n    String(row.session_token) === String(req.session_token) &&\n    String(row.estado).toUpperCase() === 'ACTIVA'\n);\n\nif (!session) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'SESSION_INVALIDA',\n        status_http: 401,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// USUARIO ACTIVO\n// =========================================================\n\nconst user = rows.find(\n  row =>\n    String(row.usuario_id) === String(session.usuario_id) &&\n    row.email_normalizado !== undefined\n);\n\nif (!user || String(user.estado).toUpperCase() !== 'ACTIVO') {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'USUARIO_INACTIVO',\n        status_http: 403,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// EVENTOS DISPONIBLES EN LOS DATOS DEL MERGE\n// =========================================================\n\nconst events = rows.filter(\n  row =>\n    row.evento_id &&\n    row.nombre !== undefined &&\n    row.capacidad !== undefined\n);\n\n// =========================================================\n// READ\n// =========================================================\n\nif (req.operation === 'READ') {\n  const userRegistrations = rows\n    .filter(\n      row =>\n        row.inscripcion_id &&\n        String(row.usuario_id) ===\n          String(user.usuario_id)\n    )\n    .map(registration => {\n\n      const event = events.find(\n        eventRow =>\n          String(eventRow.evento_id) ===\n          String(registration.evento_id)\n      );\n\n      return {\n        ...registration,\n\n        evento_nombre:\n          event?.nombre ||\n          registration.evento_id ||\n          'Evento EventPass'\n      };\n    });\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'READ',\n        usuario_id: user.usuario_id,\n        inscripciones: userRegistrations,\n        status_http: 200,\n        route: 'READ'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR EVENTO\n// =========================================================\n\nconst event = events.find(\n  row =>\n    String(row.evento_id) ===\n      String(req.evento_id)\n);\n\nif (!event) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'EVENTO_NO_ENCONTRADO',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// INSCRIPCIONES DEL EVENTO\n// =========================================================\n\nconst registrations = rows.filter(\n  row =>\n    row.inscripcion_id &&\n    String(row.evento_id) ===\n      String(req.evento_id)\n);\n\n// =========================================================\n// CREATE\n// =========================================================\n\nif (req.operation === 'CREATE') {\n\n  const telegramLinked = rows.some(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      row.chat_id &&\n      String(row.estado).toUpperCase() === 'ACTIVA'\n  );\n\n  if (!telegramLinked) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'TELEGRAM_NO_VINCULADO',\n          status_http: 403,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  if (\n    String(event.estado).toUpperCase() !==\n    'PUBLICADO'\n  ) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'EVENTO_NO_DISPONIBLE',\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const duplicate = registrations.find(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      String(row.estado).toUpperCase() !==\n        'CANCELADA'\n  );\n\n  if (duplicate) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'INSCRIPCION_DUPLICADA',\n          inscripcion_id:\n            duplicate.inscripcion_id,\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const confirmed = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'CONFIRMADA'\n  ).length;\n\n  const state =\n    confirmed < Number(event.capacidad)\n      ? 'CONFIRMADA'\n      : 'LISTA_ESPERA';\n\n  const waiting = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'LISTA_ESPERA'\n  ).length;\n\n  const now =\n    new Date().toISOString();\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CREATE',\n\n        inscripcion_id:\n          'INS-' +\n          Math.random()\n            .toString(36)\n            .slice(2, 10)\n            .toUpperCase(),\n\n        usuario_id:\n          user.usuario_id,\n\n        evento_id:\n          event.evento_id,\n\n        evento_nombre:\n          event.nombre,\n\n        estado:\n          state,\n\n        fecha_inscripcion:\n          now,\n\n        fecha_actualizacion:\n          now,\n\n        nombre_acreditacion:\n          req.nombre_acreditacion ||\n          user.nombre,\n\n        observaciones:\n          req.observaciones ||\n          '',\n\n        origen:\n          req.origen ||\n          'WEB',\n\n        orden_espera:\n          state === 'LISTA_ESPERA'\n            ? waiting + 1\n            : '',\n\n        status_http: 201,\n\n        route: 'CREATE'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR INSCRIPCIÓN ACTIVA\n// =========================================================\n\nconst current = registrations.find(\n  row =>\n    String(row.usuario_id) ===\n      String(user.usuario_id) &&\n    String(row.estado).toUpperCase() !==\n      'CANCELADA'\n);\n\nif (!current) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'INSCRIPCION_NO_ENCONTRADA',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// CANCEL\n// =========================================================\n\nif (req.operation === 'CANCEL') {\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CANCEL',\n        inscripcion_id:\n          current.inscripcion_id,\n        usuario_id:\n          user.usuario_id,\n        evento_id:\n          event.evento_id,\n        evento_nombre:\n          event.nombre,\n        estado:\n          'CANCELADA',\n        fecha_actualizacion:\n          new Date().toISOString(),\n        status_http: 200,\n        route: 'CANCEL'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// UPDATE\n// =========================================================\n\nreturn [\n  {\n    json: {\n      ok: true,\n      operation: 'UPDATE',\n\n      inscripcion_id:\n        current.inscripcion_id,\n\n      usuario_id:\n        user.usuario_id,\n\n      evento_id:\n        event.evento_id,\n\n      evento_nombre:\n        event.nombre,\n\n      estado:\n        current.estado,\n\n      fecha_inscripcion:\n        current.fecha_inscripcion,\n\n      fecha_actualizacion:\n        new Date().toISOString(),\n\n      nombre_acreditacion:\n        req.nombre_acreditacion ||\n        current.nombre_acreditacion,\n\n      observaciones:\n        req.observaciones ||\n        current.observaciones,\n\n      origen:\n        current.origen,\n\n      orden_espera:\n        current.orden_espera,\n\n      status_http: 200,\n\n      route: 'UPDATE'\n    }\n  }\n];"
+        "jsCode": "const req = $('Validar solicitud').first().json;\nconst rows = $input.all().map(item => item.json);\n\nif (req.ok === false) {\n  return [\n    {\n      json: {\n        ...req,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// SESIÓN VÁLIDA\n// =========================================================\n\nconst session = rows.find(\n  row =>\n    row.session_token !== undefined &&\n    String(row.session_token) === String(req.session_token) &&\n    String(row.estado).toUpperCase() === 'ACTIVA'\n);\n\nif (!session) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'SESSION_INVALIDA',\n        status_http: 401,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// USUARIO ACTIVO\n// =========================================================\n\nconst user = rows.find(\n  row =>\n    String(row.usuario_id) === String(session.usuario_id) &&\n    row.email_normalizado !== undefined\n);\n\nif (!user || String(user.estado).toUpperCase() !== 'ACTIVO') {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'USUARIO_INACTIVO',\n        status_http: 403,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// EVENTOS DISPONIBLES EN LOS DATOS DEL MERGE\n// =========================================================\n\nconst events = rows.filter(\n  row =>\n    row.evento_id &&\n    row.nombre !== undefined &&\n    row.capacidad !== undefined\n);\n\n// =========================================================\n// READ\n// =========================================================\n\nif (req.operation === 'READ') {\n  const userRegistrations = rows\n    .filter(\n      row =>\n        row.inscripcion_id &&\n        String(row.usuario_id) ===\n          String(user.usuario_id)\n    )\n    .map(registration => {\n\n      const event = events.find(\n        eventRow =>\n          String(eventRow.evento_id) ===\n          String(registration.evento_id)\n      );\n\n      return {\n        ...registration,\n\n        evento_nombre:\n          event?.nombre ||\n          registration.evento_id ||\n          'Evento EventPass'\n      };\n    });\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'READ',\n        usuario_id: user.usuario_id,\n        inscripciones: userRegistrations,\n        status_http: 200,\n        route: 'READ'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR EVENTO\n// =========================================================\n\nconst event = events.find(\n  row =>\n    String(row.evento_id) ===\n    String(req.evento_id)\n);\n\nif (!event) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'EVENTO_NO_ENCONTRADO',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// INSCRIPCIONES DEL EVENTO\n// =========================================================\n\nconst registrations = rows.filter(\n  row =>\n    row.inscripcion_id &&\n    String(row.evento_id) ===\n      String(req.evento_id)\n);\n\n// =========================================================\n// CREATE\n// =========================================================\n\nif (req.operation === 'CREATE') {\n\n  const telegramLinked = rows.some(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      row.chat_id &&\n      String(row.estado).toUpperCase() === 'ACTIVA'\n  );\n\n  if (!telegramLinked) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'TELEGRAM_NO_VINCULADO',\n          status_http: 403,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  if (\n    String(event.estado).toUpperCase() !==\n    'PUBLICADO'\n  ) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'EVENTO_NO_DISPONIBLE',\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const duplicate = registrations.find(\n    row =>\n      String(row.usuario_id) ===\n        String(user.usuario_id) &&\n      String(row.estado).toUpperCase() !==\n        'CANCELADA'\n  );\n\n  if (duplicate) {\n    return [\n      {\n        json: {\n          ok: false,\n          error: 'INSCRIPCION_DUPLICADA',\n          inscripcion_id:\n            duplicate.inscripcion_id,\n          status_http: 409,\n          route: 'ERROR'\n        }\n      }\n    ];\n  }\n\n  const confirmed = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'CONFIRMADA'\n  ).length;\n\n  const state =\n    confirmed < Number(event.capacidad)\n      ? 'CONFIRMADA'\n      : 'LISTA_ESPERA';\n\n  const waiting = registrations.filter(\n    row =>\n      String(row.estado).toUpperCase() ===\n      'LISTA_ESPERA'\n  ).length;\n\n  const now =\n    new Date().toISOString();\n\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CREATE',\n\n        inscripcion_id:\n          'INS-' +\n          Math.random()\n            .toString(36)\n            .slice(2, 10)\n            .toUpperCase(),\n\n        usuario_id:\n          user.usuario_id,\n\n        evento_id:\n          event.evento_id,\n\n        // Nombre real del evento\n        evento_nombre:\n          event.nombre,\n\n        estado:\n          state,\n\n        fecha_inscripcion:\n          now,\n\n        fecha_actualizacion:\n          now,\n\n        nombre_acreditacion:\n          req.nombre_acreditacion ||\n          user.nombre,\n\n        observaciones:\n          req.observaciones ||\n          '',\n\n        origen:\n          req.origen ||\n          'WEB',\n\n        orden_espera:\n          state === 'LISTA_ESPERA'\n            ? waiting + 1\n            : '',\n\n        status_http: 201,\n\n        route: 'CREATE'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// BUSCAR INSCRIPCIÓN ACTIVA\n// =========================================================\n\nconst current = registrations.find(\n  row =>\n    String(row.usuario_id) ===\n      String(user.usuario_id) &&\n    String(row.estado).toUpperCase() !==\n      'CANCELADA'\n);\n\nif (!current) {\n  return [\n    {\n      json: {\n        ok: false,\n        error: 'INSCRIPCION_NO_ENCONTRADA',\n        status_http: 404,\n        route: 'ERROR'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// CANCEL\n// =========================================================\n\nif (req.operation === 'CANCEL') {\n  return [\n    {\n      json: {\n        ok: true,\n        operation: 'CANCEL',\n\n        inscripcion_id:\n          current.inscripcion_id,\n\n        usuario_id:\n          user.usuario_id,\n\n        evento_id:\n          event.evento_id,\n\n        evento_nombre:\n          event.nombre,\n\n        estado:\n          'CANCELADA',\n\n        fecha_actualizacion:\n          new Date().toISOString(),\n\n        status_http: 200,\n\n        route: 'CANCEL'\n      }\n    }\n  ];\n}\n\n// =========================================================\n// UPDATE\n// =========================================================\n\nreturn [\n  {\n    json: {\n      ok: true,\n      operation: 'UPDATE',\n\n      inscripcion_id:\n        current.inscripcion_id,\n\n      usuario_id:\n        user.usuario_id,\n\n      evento_id:\n        event.evento_id,\n\n      evento_nombre:\n        event.nombre,\n\n      estado:\n        current.estado,\n\n      fecha_inscripcion:\n        current.fecha_inscripcion,\n\n      fecha_actualizacion:\n        new Date().toISOString(),\n\n      nombre_acreditacion:\n        req.nombre_acreditacion ||\n        current.nombre_acreditacion,\n\n      observaciones:\n        req.observaciones ||\n        current.observaciones,\n\n      origen:\n        current.origen,\n\n      orden_espera:\n        current.orden_espera,\n\n      status_http: 200,\n\n      route: 'UPDATE'\n    }\n  }\n];"
       },
       "id": "59f4aa7d-f84c-47ae-949e-73b06dcd4337",
       "name": "Procesar inscripción",
@@ -366,8 +366,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1488,
-        240
+        1520,
+        144
       ]
     },
     {
@@ -529,7 +529,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1632,
+        1856,
         368
       ],
       "id": "ac66d460-37cb-4f02-a7af-c13d9dd07912",
@@ -926,6 +926,113 @@
       ],
       "id": "b32212b2-2204-4424-9f5e-78ab1e0121dd",
       "name": "Merge3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "OoiPLhwkhAPhYjM9",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/OoiPLhwkhAPhYjM9",
+          "cachedResultName": "WF09_notificaciones"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "usuario_id": "={{$json.usuario_id}}",
+            "tipo": "={{$json.estado === 'CONFIRMADA' ? 'INSCRIPCION_CONFIRMADA' : 'INSCRIPCION_LISTA_ESPERA'}}",
+            "titulo": "={{ $json.estado === 'CONFIRMADA' ? 'Inscripción confirmada — EventPass' : 'Inscripción en lista de espera — EventPass' }}",
+            "mensaje": "={{ $json.estado === 'CONFIRMADA'\n  ? 'Tu inscripción al evento \"' + $('Procesar inscripción').item.json.evento_nombre + '\" fue confirmada correctamente.'\n  : 'Has entrado a la lista de espera del evento \"' + $('Procesar inscripción').item.json.evento_nombre + '\". Te notificaremos si se libera un cupo.'\n}}",
+            "evento_id": "={{ $json.evento_id }}",
+            "inscripcion_id": "={{ $json.inscripcion_id }}",
+            "clave_idempotencia": "={{ $json.usuario_id + '|' + $json.evento_id + '|' + $json.estado }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "usuario_id",
+              "displayName": "usuario_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "tipo",
+              "displayName": "tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "titulo",
+              "displayName": "titulo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "evento_id",
+              "displayName": "evento_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "inscripcion_id",
+              "displayName": "inscripcion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "clave_idempotencia",
+              "displayName": "clave_idempotencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        320
+      ],
+      "id": "bf72158c-a096-4f3e-aae9-e5ffc1203b52",
+      "name": "Call 'WF09_notificaciones'"
     }
   ],
   "pinData": {},
@@ -1043,6 +1150,11 @@
         [
           {
             "node": "Respuesta JSON",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Call 'WF09_notificaciones'",
             "type": "main",
             "index": 0
           }
@@ -1164,14 +1276,23 @@
           }
         ]
       ]
+    },
+    "Respuesta JSON": {
+      "main": [
+        []
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 20
   },
-  "versionId": "57a9691c-af1c-4fe7-9239-e3e518af1e5b",
+  "versionId": "ca4fd351-50e9-4908-a612-cb4379ef16eb",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "53b3895fb4b8f730c73a38c8a59bd3e31bbfd86eb25c9149349aa45de31cee6e"

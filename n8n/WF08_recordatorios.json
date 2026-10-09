@@ -483,7 +483,11 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "timeSavedPerExecution": 20
   },
   "versionId": "46ff8dd0-8a89-4fbf-862e-26ac8cdc9a29",
   "meta": {
