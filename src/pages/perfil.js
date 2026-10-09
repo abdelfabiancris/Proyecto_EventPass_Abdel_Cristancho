@@ -1003,7 +1003,7 @@ async function loadUserRegistrations(page) {
 
     if (checkinButton) {
       checkinButton.addEventListener("click", async () => {
-        console.log("Clic en Registrar asistencia detectado");
+      
 
         // El resto de tu función actual continúa aquí.
 
