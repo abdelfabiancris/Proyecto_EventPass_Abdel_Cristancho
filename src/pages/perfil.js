@@ -991,12 +991,22 @@ async function loadUserRegistrations(page) {
         );
       }
 
-      const checkinButton = item.querySelector(
-  ".registration-checkin-button"
-);
+      
+    const checkinButton = item.querySelector(
+      ".registration-checkin-button"
+    );
 
-if (checkinButton) {
-  checkinButton.addEventListener("click", async () => {
+    console.log(
+      "Botón de check-in encontrado:",
+      Boolean(checkinButton)
+    );
+
+    if (checkinButton) {
+      checkinButton.addEventListener("click", async () => {
+        console.log("Clic en Registrar asistencia detectado");
+
+        // El resto de tu función actual continúa aquí.
+
     const inscripcionId =
       checkinButton.dataset.inscripcionId;
 
