@@ -3,6 +3,7 @@ const N8N_WF02_URL = import.meta.env.VITE_N8N_WF02_URL;
 const N8N_WF05_URL = import.meta.env.VITE_N8N_WF05_URL;
 const N8N_WF03_URL = import.meta.env.VITE_N8N_WF03_URL;
 const N8N_WF06_URL = import.meta.env.VITE_N8N_WF06_URL;
+const N8N_WF11_URL = import.meta.env.VITE_N8N_WF11_URL;
 
 
 
@@ -256,6 +257,19 @@ export async function cancelRegistration({
     body: JSON.stringify({
       operation: "CANCEL",
       session_token: sessionToken,
+      evento_id: eventoId,
+    }),
+  });
+}
+
+export async function checkInRegistration({
+  inscripcionId,
+  eventoId,
+}) {
+  return request(N8N_WF11_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      inscripcion_id: inscripcionId,
       evento_id: eventoId,
     }),
   });

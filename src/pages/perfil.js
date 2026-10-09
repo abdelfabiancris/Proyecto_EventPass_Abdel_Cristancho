@@ -4,7 +4,8 @@ import {
   requestTelegramLink,
   getTelegramStatus,
   getRegistrations,
-  cancelRegistration
+  cancelRegistration,
+  checkInRegistration,
 } from "../services/api.js";
 
 
@@ -849,6 +850,14 @@ async function loadUserRegistrations(page) {
           'Cancelada';
       }
 
+      const inscripcionId = inscripcion.inscripcion_id;
+
+      const puedeHacerCheckin =
+        estado === "CONFIRMADA" && Boolean(inscripcionId);
+
+      const yaAsistio = estado === "ASISTIO";
+      
+
       item.innerHTML = `
         <div class="registration-item__top">
 
@@ -926,23 +935,40 @@ async function loadUserRegistrations(page) {
         ${
           estado !== 'CANCELADA'
             ? `
-              <div class="registration-item__actions">
 
+        <div class="registration-item__actions">
+
+          ${
+            puedeHacerCheckin
+              ? `
                 <button
                   type="button"
-                  class="
-                    btn
-                    btn-outline
-                    registration-cancel-button
-                  "
-                  data-evento-id="${
-                    inscripcion.evento_id
-                  }"
+                  class="btn registration-checkin-button"
+                  data-inscripcion-id="${inscripcionId}"
+                  data-evento-id="${inscripcion.evento_id}"
                 >
-                  Cancelar inscripción
+                  Registrar asistencia
                 </button>
+              `
+              : yaAsistio
+                ? `
+                  <button type="button" class="btn" disabled>
+                    Asistencia registrada ✓
+                  </button>
+                `
+                : ''
+          }
 
-              </div>
+          <button
+            type="button"
+            class="btn btn-outline registration-cancel-button"
+            data-evento-id="${inscripcion.evento_id}"
+          >
+            Cancelar inscripción
+          </button>
+
+        </div>
+
             `
             : ''
         }
@@ -964,6 +990,64 @@ async function loadUserRegistrations(page) {
           }
         );
       }
+
+      const checkinButton = item.querySelector(
+  ".registration-checkin-button"
+);
+
+if (checkinButton) {
+  checkinButton.addEventListener("click", async () => {
+    const inscripcionId =
+      checkinButton.dataset.inscripcionId;
+
+    const eventoId =
+      checkinButton.dataset.eventoId;
+
+    checkinButton.disabled = true;
+    checkinButton.textContent = "Registrando asistencia...";
+
+    status.textContent = "Procesando check-in...";
+    status.className = "form-message";
+
+    try {
+      const response = await checkInRegistration({
+        inscripcionId,
+        eventoId,
+      });
+
+      if (
+        response?.ok !== true ||
+        response?.resultado !== "EXITOSO"
+      ) {
+        throw new Error(
+          response?.detalle ||
+          response?.error ||
+          "No fue posible registrar la asistencia."
+        );
+      }
+
+      status.textContent =
+        "¡Check-in exitoso! Tu asistencia quedó registrada.";
+
+      status.className =
+        "form-message form-message--success";
+
+      await loadUserRegistrations(page);
+    } catch (error) {
+      console.error("Error en el check-in:", error);
+
+      status.textContent =
+        error.message ||
+        "No fue posible registrar la asistencia.";
+
+      status.className =
+        "form-message form-message--error";
+
+      checkinButton.disabled = false;
+      checkinButton.textContent = "Registrar asistencia";
+    }
+  });
+}
 
       list.appendChild(item);
     });
