@@ -953,7 +953,7 @@ async function loadUserRegistrations(page) {
               : yaAsistio
                 ? `
                   <button type="button" class="btn" disabled>
-                    Asistencia registrada ✓
+                    Asistio ✓
                   </button>
                 `
                 : ''
